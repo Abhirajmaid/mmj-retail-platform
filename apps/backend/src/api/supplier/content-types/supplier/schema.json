@@ -13,6 +13,10 @@
   "pluginOptions": {},
   "attributes": {
     "name": {
+      "type": "string",
+      "required": true
+    },
+    "mobile": {
       "type": "string"
     },
     "email": {
@@ -24,10 +28,28 @@
     "address": {
       "type": "text"
     },
+    "gst": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
     "products": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product"
+    },
+    "purchase_orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::purchase-order.purchase-order",
+      "mappedBy": "supplier"
+    },
+    "stones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::stone.stone",
+      "mappedBy": "supplier"
     }
   }
 }

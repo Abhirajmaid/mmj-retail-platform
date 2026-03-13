@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "karigars",
+  "info": {
+    "singularName": "karigar",
+    "pluralName": "karigars",
+    "displayName": "Karigar",
+    "description": "Artisans / craftsmen who manufacture jewellery"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "mobile": {
+      "type": "string"
+    },
+    "labour_type": {
+      "type": "enumeration",
+      "enum": ["per_gram", "per_piece", "fixed", "percentage"]
+    },
+    "labour_rate": {
+      "type": "decimal"
+    },
+    "address": {
+      "type": "text"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "manufacturing_orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::manufacturing-order.manufacturing-order",
+      "mappedBy": "karigar"
+    }
+  }
+}

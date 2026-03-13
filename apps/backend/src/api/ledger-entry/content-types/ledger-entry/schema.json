@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ledger_entries",
+  "info": {
+    "singularName": "ledger-entry",
+    "pluralName": "ledger-entries",
+    "displayName": "Ledger Entry",
+    "description": "Double-entry ledger for financial tracking"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "entity_type": {
+      "type": "enumeration",
+      "enum": ["customer", "supplier", "karigar", "store", "other"]
+    },
+    "entity_id": {
+      "type": "integer"
+    },
+    "debit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "credit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "description": {
+      "type": "text"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "reference_type": {
+      "type": "string"
+    },
+    "reference_id": {
+      "type": "integer"
+    }
+  }
+}

@@ -13,6 +13,10 @@
   "pluginOptions": {},
   "attributes": {
     "name": {
+      "type": "string",
+      "required": true
+    },
+    "mobile": {
       "type": "string"
     },
     "email": {
@@ -24,10 +28,57 @@
     "address": {
       "type": "text"
     },
+    "city": {
+      "type": "string"
+    },
+    "pincode": {
+      "type": "string"
+    },
+    "pan_number": {
+      "type": "string"
+    },
+    "aadhaar_number": {
+      "type": "string"
+    },
+    "loyalty_points": {
+      "type": "integer",
+      "default": 0
+    },
+    "credit_limit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "notes": {
+      "type": "text"
+    },
     "orders": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::order.order",
+      "mappedBy": "customer"
+    },
+    "sales": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sale.sale",
+      "mappedBy": "customer"
+    },
+    "custom_orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::custom-order.custom-order",
+      "mappedBy": "customer"
+    },
+    "repairs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::repair.repair",
+      "mappedBy": "customer"
+    },
+    "saving_schemes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::saving-scheme.saving-scheme",
       "mappedBy": "customer"
     }
   }

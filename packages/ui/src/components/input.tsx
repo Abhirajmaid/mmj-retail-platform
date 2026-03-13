@@ -1,39 +1,53 @@
 "use client";
 
-import type { InputHTMLAttributes } from "react";
+import * as React from "react";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+import { cn } from "../lib/utils";
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   hint?: string;
 }
 
-export function Input({ label, error, hint, id, className = "", ...props }: InputProps) {
-  const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, label, error, hint, id, ...props }, ref) => {
+    const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
-  return (
-    <div className="flex flex-col gap-1">
-      {label && (
-        <label
-          htmlFor={inputId}
-          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-        >
-          {label}
-        </label>
-      )}
+    const input = (
       <input
+        type={type}
         id={inputId}
-        className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder-zinc-500 ${
-          error
-            ? "border-red-400 focus:ring-red-300"
-            : "border-zinc-300 focus:ring-zinc-400 dark:border-zinc-700 dark:focus:ring-zinc-500"
-        } ${className}`}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          error && "border-red-400 focus-visible:ring-red-300",
+          className
+        )}
+        ref={ref}
         {...props}
       />
-      {hint && !error && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">{hint}</p>
-      )}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
-  );
-}
+    );
+
+    if (!label && !error && !hint) {
+      return input;
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        {label && (
+          <label htmlFor={inputId} className="text-sm font-medium text-zinc-700">
+            {label}
+          </label>
+        )}
+        {input}
+        {hint && !error && <p className="text-xs text-zinc-500">{hint}</p>}
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </div>
+    );
+  }
+);
+
+Input.displayName = "Input";
+
+export { Input };

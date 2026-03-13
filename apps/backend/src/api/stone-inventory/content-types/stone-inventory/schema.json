@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "stone_inventories",
+  "info": {
+    "singularName": "stone-inventory",
+    "pluralName": "stone-inventories",
+    "displayName": "Stone Inventory",
+    "description": "Stock tracking for precious stones"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "quantity": {
+      "type": "integer",
+      "default": 0
+    },
+    "cost": {
+      "type": "decimal"
+    },
+    "stone": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::stone.stone",
+      "inversedBy": "stone_inventories"
+    }
+  }
+}

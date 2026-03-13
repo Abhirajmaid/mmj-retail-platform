@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "custom_orders",
+  "info": {
+    "singularName": "custom-order",
+    "pluralName": "custom-orders",
+    "displayName": "Custom Order",
+    "description": "Custom jewellery orders placed by customers"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "design_reference": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "advance_amount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "estimated_amount": {
+      "type": "decimal"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "in-progress", "ready", "delivered", "cancelled"],
+      "default": "pending"
+    },
+    "expected_delivery": {
+      "type": "date"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "custom_orders"
+    }
+  }
+}

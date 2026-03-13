@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sale_items",
+  "info": {
+    "singularName": "sale-item",
+    "pluralName": "sale-items",
+    "displayName": "Sale Item",
+    "description": "Individual jewellery items within a sale"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "gold_rate": {
+      "type": "decimal"
+    },
+    "making_charge": {
+      "type": "decimal",
+      "default": 0
+    },
+    "stone_cost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "gst": {
+      "type": "decimal",
+      "default": 0
+    },
+    "discount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "final_price": {
+      "type": "decimal"
+    },
+    "sale": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::sale.sale",
+      "inversedBy": "sale_items"
+    },
+    "jewellery_item": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::jewellery-item.jewellery-item",
+      "inversedBy": "sale_item"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "purchase_items",
+  "info": {
+    "singularName": "purchase-item",
+    "pluralName": "purchase-items",
+    "displayName": "Purchase Item",
+    "description": "Individual items within a purchase order"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "cost": {
+      "type": "decimal"
+    },
+    "weight": {
+      "type": "decimal"
+    },
+    "purchase_order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::purchase-order.purchase-order",
+      "inversedBy": "purchase_items"
+    },
+    "jewellery_item": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::jewellery-item.jewellery-item",
+      "inversedBy": "purchase_item"
+    }
+  }
+}

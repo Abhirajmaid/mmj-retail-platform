@@ -23,6 +23,10 @@
     "description": {
       "type": "text"
     },
+    "metal_type": {
+      "type": "enumeration",
+      "enum": ["gold", "silver", "diamond", "platinum", "other"]
+    },
     "products": {
       "type": "relation",
       "relation": "oneToMany",

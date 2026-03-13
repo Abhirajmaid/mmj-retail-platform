@@ -30,29 +30,45 @@ async function setDefaultPermissions(strapi: Core.Strapi) {
     { action: 'api::category.category.findOne', roleId: publicRole.id },
   ];
 
-  // Authenticated CRUD permissions
-  const authenticatedPermissions = [
-    { action: 'api::order.order.find', roleId: authenticatedRole.id },
-    { action: 'api::order.order.findOne', roleId: authenticatedRole.id },
-    { action: 'api::order.order.create', roleId: authenticatedRole.id },
-    { action: 'api::order.order.update', roleId: authenticatedRole.id },
-    { action: 'api::order.order.delete', roleId: authenticatedRole.id },
-    { action: 'api::customer.customer.find', roleId: authenticatedRole.id },
-    { action: 'api::customer.customer.findOne', roleId: authenticatedRole.id },
-    { action: 'api::customer.customer.create', roleId: authenticatedRole.id },
-    { action: 'api::customer.customer.update', roleId: authenticatedRole.id },
-    { action: 'api::customer.customer.delete', roleId: authenticatedRole.id },
-    { action: 'api::invoice.invoice.find', roleId: authenticatedRole.id },
-    { action: 'api::invoice.invoice.findOne', roleId: authenticatedRole.id },
-    { action: 'api::invoice.invoice.create', roleId: authenticatedRole.id },
-    { action: 'api::invoice.invoice.update', roleId: authenticatedRole.id },
-    { action: 'api::invoice.invoice.delete', roleId: authenticatedRole.id },
-    { action: 'api::inventory.inventory.find', roleId: authenticatedRole.id },
-    { action: 'api::inventory.inventory.findOne', roleId: authenticatedRole.id },
-    { action: 'api::inventory.inventory.create', roleId: authenticatedRole.id },
-    { action: 'api::inventory.inventory.update', roleId: authenticatedRole.id },
-    { action: 'api::inventory.inventory.delete', roleId: authenticatedRole.id },
+  // Authenticated CRUD permissions — all ERP collections
+  const erpCollections = [
+    'order', 'customer', 'invoice', 'inventory', 'supplier',
+    // New ERP content types
+    'store', 'jewellery-item', 'stone', 'stone-inventory',
+    'purchase-order', 'purchase-item',
+    'sale', 'sale-item', 'payment',
+    'custom-order', 'repair',
+    'manufacturing-order', 'karigar',
+    'expense', 'ledger-entry', 'saving-scheme',
   ];
+
+  const crudActions = ['find', 'findOne', 'create', 'update', 'delete'];
+
+  const authenticatedPermissions = erpCollections.flatMap((col) => {
+    const uid = col === 'jewellery-item'
+      ? 'api::jewellery-item.jewellery-item'
+      : col === 'stone-inventory'
+        ? 'api::stone-inventory.stone-inventory'
+        : col === 'purchase-order'
+          ? 'api::purchase-order.purchase-order'
+          : col === 'purchase-item'
+            ? 'api::purchase-item.purchase-item'
+            : col === 'sale-item'
+              ? 'api::sale-item.sale-item'
+              : col === 'custom-order'
+                ? 'api::custom-order.custom-order'
+                : col === 'manufacturing-order'
+                  ? 'api::manufacturing-order.manufacturing-order'
+                  : col === 'ledger-entry'
+                    ? 'api::ledger-entry.ledger-entry'
+                    : col === 'saving-scheme'
+                      ? 'api::saving-scheme.saving-scheme'
+                      : `api::${col}.${col}`;
+    return crudActions.map((act) => ({
+      action: `${uid}.${act}`,
+      roleId: authenticatedRole.id,
+    }));
+  });
 
   const allPermissions = [...publicPermissions, ...authenticatedPermissions];
 

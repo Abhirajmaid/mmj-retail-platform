@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "stones",
+  "info": {
+    "singularName": "stone",
+    "pluralName": "stones",
+    "displayName": "Stone",
+    "description": "Precious and semi-precious stones catalog"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["diamond", "ruby", "emerald", "sapphire", "pearl", "other"]
+    },
+    "carat": {
+      "type": "decimal"
+    },
+    "color": {
+      "type": "string"
+    },
+    "clarity": {
+      "type": "string"
+    },
+    "cost": {
+      "type": "decimal"
+    },
+    "supplier": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::supplier.supplier",
+      "inversedBy": "stones"
+    },
+    "stone_inventories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::stone-inventory.stone-inventory",
+      "mappedBy": "stone"
+    }
+  }
+}

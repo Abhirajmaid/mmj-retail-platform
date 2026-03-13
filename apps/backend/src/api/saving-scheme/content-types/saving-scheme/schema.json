@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "saving_schemes",
+  "info": {
+    "singularName": "saving-scheme",
+    "pluralName": "saving-schemes",
+    "displayName": "Saving Scheme",
+    "description": "Customer jewellery saving/installment schemes"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "scheme_name": {
+      "type": "string"
+    },
+    "monthly_amount": {
+      "type": "decimal",
+      "required": true
+    },
+    "total_installments": {
+      "type": "integer",
+      "default": 11
+    },
+    "installments_paid": {
+      "type": "integer",
+      "default": 0
+    },
+    "start_date": {
+      "type": "date"
+    },
+    "maturity_date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "completed", "defaulted", "cancelled"],
+      "default": "active"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "saving_schemes"
+    }
+  }
+}

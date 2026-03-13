@@ -20,6 +20,10 @@
       "type": "uid",
       "targetField": "name"
     },
+    "design_number": {
+      "type": "string",
+      "unique": true
+    },
     "description": {
       "type": "richtext"
     },
@@ -32,6 +36,10 @@
     },
     "weight": {
       "type": "decimal"
+    },
+    "metal_type": {
+      "type": "enumeration",
+      "enum": ["gold", "silver", "diamond", "platinum", "other"]
     },
     "metal": {
       "type": "string"
@@ -54,6 +62,12 @@
       "relation": "manyToOne",
       "target": "api::category.category",
       "inversedBy": "products"
+    },
+    "jewellery_items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::jewellery-item.jewellery-item",
+      "mappedBy": "product"
     }
   }
 }

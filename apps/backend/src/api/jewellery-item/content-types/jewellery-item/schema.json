@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "jewellery_items",
+  "info": {
+    "singularName": "jewellery-item",
+    "pluralName": "jewellery-items",
+    "displayName": "Jewellery Item",
+    "description": "Individual physical jewellery items with barcode and weight details"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "barcode": {
+      "type": "string",
+      "unique": true
+    },
+    "tag_number": {
+      "type": "string",
+      "unique": true
+    },
+    "gross_weight": {
+      "type": "decimal"
+    },
+    "net_weight": {
+      "type": "decimal"
+    },
+    "stone_weight": {
+      "type": "decimal",
+      "default": 0
+    },
+    "purity": {
+      "type": "string"
+    },
+    "making_charges": {
+      "type": "decimal",
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["available", "sold", "repair", "manufacturing", "transferred"],
+      "default": "available"
+    },
+    "location": {
+      "type": "string"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "jewellery_items"
+    },
+    "store": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::store.store",
+      "inversedBy": "jewellery_items"
+    },
+    "sale_item": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::sale-item.sale-item",
+      "mappedBy": "jewellery_item"
+    },
+    "purchase_item": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::purchase-item.purchase-item",
+      "mappedBy": "jewellery_item"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "repairs",
+  "info": {
+    "singularName": "repair",
+    "pluralName": "repairs",
+    "displayName": "Repair",
+    "description": "Jewellery repair jobs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "item_description": {
+      "type": "string",
+      "required": true
+    },
+    "issue": {
+      "type": "text"
+    },
+    "estimated_cost": {
+      "type": "decimal"
+    },
+    "actual_cost": {
+      "type": "decimal"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["received", "in-progress", "ready", "delivered", "cancelled"],
+      "default": "received"
+    },
+    "received_date": {
+      "type": "date",
+      "required": true
+    },
+    "delivery_date": {
+      "type": "date"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "repairs"
+    }
+  }
+}
