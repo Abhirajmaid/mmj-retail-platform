@@ -1,0 +1,27 @@
+---
+description: Document major repo changes in root docs folder
+alwaysApply: true
+---
+
+# Change Documentation
+
+This rule applies only inside this repository. Do not treat it as a global preference for other projects unless the user explicitly asks for the same rule there.
+
+Create or update a Markdown file in the root `docs/` folder after each major change or meaningful update.
+
+- Use `docs/` at the repository root.
+- Create concise `.md` files with clear names like `docs/auth-update.md` or `docs/invoice-flow.md`.
+- Include what changed, why it changed, and any setup, migration, or follow-up notes.
+- Update an existing related doc instead of creating duplicates when that is cleaner.
+
+## Example
+
+```markdown
+# Invoice Update
+
+## What Changed
+- Added invoice status validation.
+
+## Why
+- Prevent invalid transitions in checkout flows.
+```
