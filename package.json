@@ -1,0 +1,22 @@
+{
+  "name": "jewellery-retail-platform",
+  "private": true,
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --filter=!@jewellery-retail/backend",
+    "dev:backend": "turbo run dev --filter=@jewellery-retail/backend",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "turbo": "^2.0.0"
+  }
+}

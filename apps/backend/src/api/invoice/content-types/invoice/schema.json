@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoices",
+  "info": {
+    "singularName": "invoice",
+    "pluralName": "invoices",
+    "displayName": "Invoice",
+    "description": "Customer invoices linked to orders"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "invoiceNumber": {
+      "type": "uid"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order"
+    },
+    "total": {
+      "type": "decimal"
+    },
+    "tax": {
+      "type": "decimal"
+    },
+    "discount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "paid", "cancelled"],
+      "default": "draft"
+    }
+  }
+}

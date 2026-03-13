@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Strapi cache and temp
+.cache/
+.tmp/
+
+# SQLite database
+*.db
+*.db-journal
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Strapi admin panel exports
+exports/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

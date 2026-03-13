@@ -1,0 +1,37 @@
+{
+  "name": "@jewellery-retail/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Strapi v5 backend for the jewellery retail platform",
+  "scripts": {
+    "dev": "strapi develop",
+    "build": "strapi build",
+    "start": "strapi start",
+    "seed": "ts-node src/seed.ts",
+    "type-gen": "strapi ts:generate-types",
+    "clean": "rimraf dist .cache .tmp"
+  },
+  "dependencies": {
+    "@strapi/plugin-graphql": "^5.0.0",
+    "@strapi/plugin-users-permissions": "^5.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "better-sqlite3": "^12.6.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.3.11"
+  },
+  "devDependencies": {
+    "@strapi/typescript-utils": "^5.0.0",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.27.4",
+    "rimraf": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventories",
+  "info": {
+    "singularName": "inventory",
+    "pluralName": "inventories",
+    "displayName": "Inventory",
+    "description": "Stock inventory tracking for jewellery products"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product"
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 0
+    },
+    "location": {
+      "type": "string"
+    },
+    "lastUpdated": {
+      "type": "datetime"
+    }
+  }
+}
