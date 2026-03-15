@@ -1,32 +1,49 @@
 {
-  "name": "billing",
+  "name": "@jewellery-retail/billing-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev --port 3001",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start --port 3001",
+    "lint": "next lint",
+    "clean": "rimraf .next"
   },
   "dependencies": {
-    "@jewellery-retail/auth": "*",
+    "@hookform/resolvers": "^3.9.0",
+    "@iconify/react": "^5.0.2",
+    "@jewellery-retail/api": "*",
     "@jewellery-retail/billing": "*",
-    "@jewellery-retail/config": "*",
+    "@jewellery-retail/crm-core": "*",
     "@jewellery-retail/hooks": "*",
+    "@jewellery-retail/types": "*",
     "@jewellery-retail/ui": "*",
     "@jewellery-retail/utils": "*",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "@tanstack/react-query": "^5.56.2",
+    "axios": "^1.7.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.437.0",
+    "next": "^15.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-hook-form": "^7.52.2",
+    "react-to-print": "^3.0.2",
+    "recharts": "^2.15.4",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8",
+    "eslint-config-next": "^15.0.0",
+    "postcss": "^8.4.41",
+    "rimraf": "^5",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.8.2"
   }
 }
