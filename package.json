@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=!@jewellery-retail/backend --filter=!mmj-web",
+    "dev": "turbo run dev --filter=!@jewellery-retail/backend",
     "dev:all": "turbo run dev --filter=!@jewellery-retail/backend",
-    "dev:storefront": "turbo run dev --filter=mmj-web",
+    "dev:storefront": "turbo run dev",
     "dev:backend": "turbo run dev --filter=@jewellery-retail/backend",
     "build": "turbo run build",
     "start": "turbo run start",
@@ -18,5 +18,10 @@
   },
   "devDependencies": {
     "turbo": "^2.0.0"
+  },
+  "dependencies": {
+    "@iconify/react": "^6.0.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   }
 }
