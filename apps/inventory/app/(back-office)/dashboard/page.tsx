@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, Boxes, IndianRupee, ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, Boxes, IndianRupee, Search, ShoppingCart } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -17,6 +18,7 @@ import { useInventory } from "@jewellery-retail/hooks";
 import {
   Badge,
   Card,
+  Input,
   StatCard,
   Table,
   TableBody,
@@ -29,9 +31,31 @@ import { dateFormat, formatCompactNumber, formatCurrency, statusColor } from "@j
 
 export default function InventoryDashboardPage() {
   const { data } = useInventory();
+  const [searchQuery, setSearchQuery] = useState("");
+  const query = searchQuery.trim().toLowerCase();
+  const filteredUpdates = query
+    ? data.recentStockUpdates.filter(
+        (m) =>
+          m.productName.toLowerCase().includes(query) ||
+          m.sku.toLowerCase().includes(query) ||
+          m.id.toLowerCase().includes(query) ||
+          m.productId.toLowerCase().includes(query)
+      )
+    : data.recentStockUpdates;
 
   return (
     <div className="space-y-6">
+      <div className="relative mr-auto w-full max-w-xl">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Input
+          type="search"
+          placeholder="Search by product name, SKU, or ID"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-10 rounded-lg border-zinc-200 bg-white pl-10 pr-4 shadow-sm"
+        />
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-[1.25fr_1fr]">
         <Card
           className="overflow-hidden border-0 p-7 text-white shadow-[0_28px_56px_-34px_rgba(23,54,132,0.55)]"
@@ -149,7 +173,10 @@ export default function InventoryDashboardPage() {
             <h2 className="text-lg font-semibold text-zinc-950">Recent stock updates</h2>
             <p className="text-sm text-zinc-500">Latest inbound, outbound, and transfer activity.</p>
           </div>
-          <Badge variant="info">{data.recentStockUpdates.length} movements</Badge>
+          <Badge variant="info">
+            {filteredUpdates.length}
+            {query ? ` of ${data.recentStockUpdates.length}` : ""} movements
+          </Badge>
         </div>
         <Table>
           <TableHead>
@@ -163,7 +190,7 @@ export default function InventoryDashboardPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.recentStockUpdates.map((movement) => (
+            {filteredUpdates.map((movement) => (
               <TableRow key={movement.id}>
                 <TableCell>
                   <div>

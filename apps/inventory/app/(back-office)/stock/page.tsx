@@ -25,29 +25,30 @@ export default function StockPage() {
   const [action, setAction] = useState<"add" | "remove" | "transfer" | null>(null);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       <PageHeader
         title="Stock"
         description="Review stock movements and trigger add, remove, or transfer workflows."
         actions={
-          <>
-            <Button variant="outline" onClick={() => setAction("add")}>
+          <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
+            <Button variant="outline" className="min-h-[44px] sm:min-h-9" onClick={() => setAction("add")}>
               <Plus className="mr-2 h-4 w-4" />
               Add stock
             </Button>
-            <Button variant="outline" onClick={() => setAction("remove")}>
+            <Button variant="outline" className="min-h-[44px] sm:min-h-9" onClick={() => setAction("remove")}>
               <Minus className="mr-2 h-4 w-4" />
               Remove stock
             </Button>
-            <Button onClick={() => setAction("transfer")}>
+            <Button className="min-h-[44px] sm:min-h-9" onClick={() => setAction("transfer")}>
               <ArrowLeftRight className="mr-2 h-4 w-4" />
               Transfer stock
             </Button>
-          </>
+          </div>
         }
       />
 
-      <Card className="p-6">
+      <div className="min-w-0 overflow-x-auto rounded-xl border border-zinc-100">
+        <Card className="min-w-[360px] p-4 sm:p-6">
         <Table>
           <TableHead>
             <TableRow>
@@ -79,7 +80,8 @@ export default function StockPage() {
             ))}
           </TableBody>
         </Table>
-      </Card>
+        </Card>
+      </div>
 
       <Modal
         open={Boolean(action)}

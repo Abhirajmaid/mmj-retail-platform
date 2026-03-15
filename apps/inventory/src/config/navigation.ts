@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Boxes,
+  Building2,
   LayoutDashboard,
   Package,
   ShoppingCart,
@@ -13,6 +14,7 @@ export const inventoryNavigation: SidebarItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Products", href: "/products", icon: Package },
   { label: "Stock", href: "/stock", icon: Boxes },
+  { label: "Firm", href: "/firm", icon: Building2 },
   { label: "Suppliers", href: "/suppliers", icon: Truck },
   { label: "Purchase Orders", href: "/purchase-orders", icon: ShoppingCart },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },

@@ -37,7 +37,7 @@ export function DashboardLayout({
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       />
-      <div className="bg-white lg:pl-[268px]">
+      <div className="min-w-0 bg-white lg:pl-[268px]">
         <Navbar
           brand={brand}
           title={title}
@@ -46,7 +46,7 @@ export function DashboardLayout({
           searchPlaceholder="Search invoices, products, customers"
           onMenuClick={() => setIsOpen(true)}
         />
-        <main className="bg-white px-4 py-6 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
+        <main className="min-w-0 bg-white px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:pb-10">{children}</main>
       </div>
     </div>
   );

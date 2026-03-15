@@ -56,3 +56,8 @@
 - Billing dev-runtime stability was improved by aligning `billing` and `inventory` to React 19 and adding app-level TypeScript path resolution so shared `packages/ui` Next imports resolve against the consuming app correctly.
 - If you want the references matched even more closely, the next pass can add specialized widgets such as mini action rails, wallet-style metric modules, and denser CRM-style quick action panels.
 - If the top bar should exactly mirror the mock, the next pass can swap the placeholder workspace controls for live user/account data and add page-specific quick action widgets.
+
+### Inventory dashboard search (March 2025)
+- **What:** A search bar sits below the top bar and above the dashboard cards (Open purchase orders, Recent updates, etc.) on the inventory dashboard. It filters the "Recent stock updates" table by product name, SKU, or ID.
+- **Why:** Lets users quickly find movements by product name, SKU, or ID without scanning the full table.
+- **Where:** `apps/inventory/app/(back-office)/dashboard/page.tsx` — search state and `filteredUpdates` drive the table; the badge shows "X of Y movements" when a filter is active.
