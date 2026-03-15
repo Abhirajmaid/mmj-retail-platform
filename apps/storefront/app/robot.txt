@@ -1,0 +1,16 @@
+# robots.txt for Mukund Maid Jewellers
+
+User-agent: *
+
+Disallow: /dashboard/
+Disallow: /sign-in/
+Disallow: /sign-up/
+Disallow: /privacy-policies/
+Disallow: /profile/
+Disallow: /scripts/
+
+# Allow search engines to crawl all other pages
+Allow: /
+
+# Sitemap location
+Sitemap: https://mukundmaidjewellers.com/sitemap.xml
