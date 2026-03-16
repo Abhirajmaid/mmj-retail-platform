@@ -2,20 +2,30 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { HelpCircle } from "lucide-react";
-import { Button, Input } from "@jewellery-retail/ui";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  ClipboardList,
+  FileText,
+  ImageIcon,
+  Receipt,
+} from "lucide-react";
+import { Button, Card, CardBody, CardHeader, CardTitle, Input, Modal } from "@jewellery-retail/ui";
 import type { Firm } from "@/src/types/firm";
 import { FIRM_TYPE_OPTIONS, MONTHS } from "@/src/types/firm";
 import { ImageUpload } from "./ImageUpload";
+import { InvoicePreview } from "./InvoicePreview";
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
 
 interface FirmFormProps {
   initial?: Firm | null;
-  onSubmit: (data: Partial<Firm>) => void;
+  onSubmit: (data: Partial<Firm>) => void | Promise<void>;
   onCancel: () => void;
   submitLabel?: string;
+  disabled?: boolean;
 }
 
 const currentYear = new Date().getFullYear();
@@ -27,6 +37,7 @@ export function FirmForm({
   onSubmit,
   onCancel,
   submitLabel = "Save / Add Firm",
+  disabled = false,
 }: FirmFormProps) {
   const [images, setImages] = useState<Partial<Pick<Firm, "formLeftImage" | "formRightLogo" | "formRightImage" | "ownerSignature" | "qrCodeImage">>>({
     formLeftImage: initial?.formLeftImage,
@@ -35,6 +46,7 @@ export function FirmForm({
     ownerSignature: initial?.ownerSignature,
     qrCodeImage: initial?.qrCodeImage,
   });
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const setImage = useCallback((key: keyof typeof images, value: string) => {
     setImages((prev) => ({ ...prev, [key]: value }));
@@ -65,20 +77,6 @@ export function FirmForm({
       myFirms: get("myFirms") || undefined,
       firmType: (get("firmType") as Firm["firmType"]) || "SELF",
       commentsOtherInfo: get("commentsOtherInfo") || undefined,
-      geoLat: get("geoLat") || undefined,
-      geoLng: get("geoLng") || undefined,
-      whatsappLink: get("whatsappLink") || undefined,
-      facebookLink: get("facebookLink") || undefined,
-      instagramLink: get("instagramLink") || undefined,
-      smtpServer: get("smtpServer") || undefined,
-      smtpPort: get("smtpPort") || undefined,
-      smtpEmailId: get("smtpEmailId") || undefined,
-      smtpEmailPassword: get("smtpEmailPassword") || undefined,
-      smtpCcEmailId: get("smtpCcEmailId") || undefined,
-      eInvoiceApiId: get("eInvoiceApiId") || undefined,
-      eInvoiceApiKey: get("eInvoiceApiKey") || undefined,
-      eInvoiceUsername: get("eInvoiceUsername") || undefined,
-      eInvoicePassword: get("eInvoicePassword") || undefined,
       paymentBankDetails: get("paymentBankDetails") || undefined,
       paymentBankAcNo: get("paymentBankAcNo") || undefined,
       paymentBankIfsc: get("paymentBankIfsc") || undefined,
@@ -96,6 +94,7 @@ export function FirmForm({
       formFooter: get("formFooter") || undefined,
       principalStartAmount: getNum("principalStartAmount"),
       principalEndAmount: getNum("principalEndAmount"),
+      status: (get("status") as Firm["status"]) || "active",
       formLeftImage: images.formLeftImage,
       formRightLogo: images.formRightLogo,
       formRightImage: images.formRightImage,
@@ -110,30 +109,24 @@ export function FirmForm({
         onSubmit={handleSubmit}
         className="flex w-full flex-col gap-6"
       >
-        {/* Hint: Required fields + HELP */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-center gap-2 text-xs text-zinc-500">
-            <span className="inline-block h-4 w-4 rounded-full bg-amber-100 text-center text-[10px] leading-4 text-amber-600" aria-hidden>i</span>
-            <span>Fields marked in <span className="font-medium text-red-500">red</span> are required.</span>
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-[44px] shrink-0 border-amber-200 bg-amber-50/50 text-amber-800 hover:bg-amber-100 sm:min-h-9"
-          >
-            <HelpCircle className="mr-1 h-4 w-4" />
-            HELP
-          </Button>
-        </div>
+        <p className="flex items-center gap-2 text-xs text-zinc-500">
+          <span className="inline-block h-4 w-4 rounded-full bg-amber-100 text-center text-[10px] leading-4 text-amber-600" aria-hidden>i</span>
+          <span>Fields marked in <span className="font-medium text-red-500">red</span> are required.</span>
+        </p>
 
-        <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-[2fr_1.75fr_1.2fr]">
-          {/* COLUMN 1 — FIRM / COMPANY DETAILS */}
-          <div className="min-w-0 space-y-4">
-            <h2 className="border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
-              FIRM / COMPANY DETAILS
-            </h2>
-
+        {/* Card 1: Company Information */}
+        <Card className="min-w-0" padding="lg">
+          <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-lg font-semibold text-zinc-900">Company Information</CardTitle>
+              <p className="text-sm text-zinc-500">Basic information about the firm</p>
+            </div>
+          </CardHeader>
+          <CardBody className="space-y-4 pt-0">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Input
               label="Firm ID (PP, RP, SR)"
               name="firmId"
@@ -199,46 +192,23 @@ export function FirmForm({
                 className={inputClass}
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="Geo Location Latitude" name="geoLat" defaultValue={initial?.geoLat} className={inputClass} />
-              <Input label="Geo Location Longitude" name="geoLng" defaultValue={initial?.geoLng} className={inputClass} />
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <Input label="WhatsApp Link" name="whatsappLink" defaultValue={initial?.whatsappLink} className={inputClass} />
-              <Input label="Facebook Link" name="facebookLink" defaultValue={initial?.facebookLink} className={inputClass} />
-              <Input label="Instagram Link" name="instagramLink" defaultValue={initial?.instagramLink} className={inputClass} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="SMTP Server" name="smtpServer" defaultValue={initial?.smtpServer} className={inputClass} />
-              <Input label="SMTP Port" name="smtpPort" defaultValue={initial?.smtpPort} className={inputClass} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="SMTP Email ID" name="smtpEmailId" defaultValue={initial?.smtpEmailId} className={inputClass} />
-              <Input label="SMTP Email Password" name="smtpEmailPassword" type="password" defaultValue={initial?.smtpEmailPassword} className={inputClass} />
-            </div>
-            <Input label="SMTP CC Email ID" name="smtpCcEmailId" defaultValue={initial?.smtpCcEmailId} className={inputClass} />
-            <div className="grid grid-cols-3 gap-2">
-              <Input label="WhatsApp Link" name="whatsappLink2" defaultValue={initial?.whatsappLink} className={inputClass} />
-              <Input label="Facebook Link" name="facebookLink2" defaultValue={initial?.facebookLink} className={inputClass} />
-              <Input label="Instagram Link" name="instagramLink2" defaultValue={initial?.instagramLink} className={inputClass} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="E-Invoice API ID" name="eInvoiceApiId" defaultValue={initial?.eInvoiceApiId} className={inputClass} />
-              <Input label="E-Invoice API Key" name="eInvoiceApiKey" defaultValue={initial?.eInvoiceApiKey} className={inputClass} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="E-Invoice Username" name="eInvoiceUsername" defaultValue={initial?.eInvoiceUsername} className={inputClass} />
-              <Input label="E-Invoice Password" name="eInvoicePassword" type="password" defaultValue={initial?.eInvoicePassword} className={inputClass} />
-            </div>
-          </div>
+          </CardBody>
+        </Card>
 
-          {/* COLUMN 2 — FORMS DETAILS */}
-          <div className="min-w-0 space-y-4">
-            <h2 className="border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
-              FORMS DETAILS
-            </h2>
-
-            <Input label="Payment Bank Details" name="paymentBankDetails" defaultValue={initial?.paymentBankDetails} className={inputClass} />
+        {/* Card 2: Forms & Banking */}
+        <Card className="min-w-0" padding="lg">
+          <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-lg font-semibold text-zinc-900">Forms & Banking</CardTitle>
+              <p className="text-sm text-zinc-500">Payment, tax and form settings</p>
+            </div>
+          </CardHeader>
+          <CardBody className="space-y-4 pt-0">
+            <Input label="Bank Name" name="paymentBankDetails" defaultValue={initial?.paymentBankDetails} className={inputClass} />
             <Input label="Payment Bank A/C No" name="paymentBankAcNo" defaultValue={initial?.paymentBankAcNo} className={inputClass} />
             <Input label="Payment Bank IFSC Code" name="paymentBankIfsc" defaultValue={initial?.paymentBankIfsc} className={inputClass} />
             <div>
@@ -302,40 +272,122 @@ export function FirmForm({
               <Input label="Principal Start Amount" name="principalStartAmount" type="number" defaultValue={initial?.principalStartAmount} className={inputClass} />
               <Input label="Principal End Amount" name="principalEndAmount" type="number" defaultValue={initial?.principalEndAmount} className={inputClass} />
             </div>
-          </div>
+          </CardBody>
+        </Card>
 
-          {/* COLUMN 3 — COMPANY LOGO & UPLOADS */}
-          <div className="min-w-0 space-y-6">
-            <h2 className="border-b border-gray-100 pb-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
-              COMPANY LOGO
-            </h2>
-
+        {/* Card 3: Documents & Media */}
+        <Card className="min-w-0" padding="lg">
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 border-b border-zinc-100 pb-4">
+            <div className="flex flex-row items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <ImageIcon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 space-y-1">
+                <CardTitle className="text-lg font-semibold text-zinc-900">Documents & Media</CardTitle>
+                <p className="text-sm text-zinc-500">Logos, signatures and QR code images</p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-amber-200 text-amber-700 hover:bg-amber-50"
+              onClick={() => setPreviewOpen(true)}
+            >
+              <Receipt className="mr-2 h-4 w-4" />
+              Preview Bill
+            </Button>
+          </CardHeader>
+          <CardBody className="pt-0">
             <FirmFormImageUploads
               initial={initial}
               images={images}
               onImageChange={setImage}
             />
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        {/* Sticky footer buttons — stack on mobile, row on larger */}
-        <div className="sticky bottom-0 flex flex-col gap-3 border-t border-gray-200 bg-white py-4 sm:flex-row sm:flex-wrap sm:items-center">
-          <Button type="button" variant="ghost" onClick={onCancel} className="min-h-[44px] order-3 sm:order-1 sm:min-h-9">
+        {/* Card 4: Firm Status */}
+        <Card className="min-w-0" padding="lg">
+          <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+              <ClipboardList className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-lg font-semibold text-zinc-900">Firm Status</CardTitle>
+              <p className="text-sm text-zinc-500">Set the type and status for this firm</p>
+            </div>
+          </CardHeader>
+          <CardBody className="pt-0">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700">Firm Type</label>
+                <select
+                  name="firmType"
+                  defaultValue={initial?.firmType ?? "SELF"}
+                  className={inputClass}
+                >
+                  {FIRM_TYPE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700">Status</label>
+                <select
+                  name="status"
+                  defaultValue={initial?.status ?? "active"}
+                  className={inputClass}
+                >
+                  <option value="active">Active</option>
+                  <option value="pending_review">Pending Review</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Footer actions — Cancel (left), Submit for Review, Create (right, primary) */}
+        <div className="flex flex-col gap-3 border-t border-zinc-100 bg-white pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            className="min-h-[44px] order-2 sm:order-1 sm:min-h-9"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Cancel
           </Button>
-          <Link href="/firm/review" className="order-2 w-full sm:order-2 sm:w-auto">
-            <Button type="button" variant="outline" className="w-full min-h-[44px] border-amber-400 text-amber-700 hover:bg-amber-50 sm:min-h-9 sm:w-auto">
-              Submit for Review
+          <div className="flex flex-wrap items-center gap-3 order-1 sm:order-2">
+            <Link href="/firm/review" className="w-full sm:w-auto">
+              <Button type="button" variant="outline" className="w-full min-h-[44px] border-amber-400 text-amber-700 hover:bg-amber-50 sm:min-h-9 sm:w-auto">
+                Submit for Review
+              </Button>
+            </Link>
+            <Button
+              type="submit"
+              disabled={disabled}
+              className="w-full min-h-[44px] bg-amber-500 text-white hover:bg-amber-600 sm:min-h-9 sm:w-auto"
+            >
+              {submitLabel}
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Link>
-          <Button
-            type="submit"
-            className="order-1 w-full min-h-[44px] bg-amber-500 text-white hover:bg-amber-600 sm:order-3 sm:w-auto sm:min-h-9"
-          >
-            {submitLabel}
-          </Button>
+          </div>
         </div>
       </form>
+
+      <Modal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title="Invoice preview"
+        size="2xl"
+      >
+        <p className="mb-4 text-sm text-zinc-500">
+          How your logos and images will appear on the bill or invoice.
+        </p>
+        <InvoicePreview images={images} />
+      </Modal>
     </div>
   );
 }
@@ -352,38 +404,55 @@ function FirmFormImageUploads({
   const v = (k: keyof typeof images) => images[k] ?? initial?.[k];
 
   return (
-    <>
-      <ImageUpload
-        label="Form Left Image"
-        value={v("formLeftImage")}
-        onChange={(val) => onImageChange("formLeftImage", val)}
-      />
-      <ImageUpload
-        label="Form Right Logo"
-        labelBold
-        value={v("formRightLogo")}
-        onChange={(val) => onImageChange("formRightLogo", val)}
-      />
-      <ImageUpload
-        label="Form Right Image"
-        value={v("formRightImage")}
-        onChange={(val) => onImageChange("formRightImage", val)}
-      />
-      <ImageUpload
-        label="Upload Owner Signature"
-        value={v("ownerSignature")}
-        onChange={(val) => onImageChange("ownerSignature", val)}
-      />
-      <p className="text-xs text-zinc-500">Owner Signature Im.</p>
-      <div className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-600">QR Code</h3>
+    <div className="space-y-6">
+      {/* Form images — 3-column grid */}
+      <div>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Form images
+        </h3>
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ImageUpload
+            label="Form Left Image"
+            value={v("formLeftImage")}
+            onChange={(val) => onImageChange("formLeftImage", val)}
+          />
+          <ImageUpload
+            label="Form Right Logo"
+            labelBold
+            value={v("formRightLogo")}
+            onChange={(val) => onImageChange("formRightLogo", val)}
+          />
+          <ImageUpload
+            label="Form Right Image"
+            value={v("formRightImage")}
+            onChange={(val) => onImageChange("formRightImage", val)}
+          />
+        </div>
+      </div>
+
+      {/* Signature — single row */}
+      <div>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Signature
+        </h3>
         <ImageUpload
-          label=""
+          label="Owner Signature"
+          value={v("ownerSignature")}
+          onChange={(val) => onImageChange("ownerSignature", val)}
+        />
+      </div>
+
+      {/* QR Code — single row */}
+      <div>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          QR Code
+        </h3>
+        <ImageUpload
+          label="QR Code Image"
           value={v("qrCodeImage")}
           onChange={(val) => onImageChange("qrCodeImage", val)}
         />
-        <p className="text-xs text-zinc-500">QR Code Image</p>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,3 +1,9 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, "..", "..");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: [
@@ -9,8 +15,12 @@ const nextConfig = {
     "@jewellery-retail/billing",
     "@jewellery-retail/crm-core",
   ],
+  turbopack: { root: repoRoot },
   images: {
-    domains: ["res.cloudinary.com", "localhost"],
+    remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "**" },
+      { protocol: "http", hostname: "localhost", pathname: "**" },
+    ],
   },
 };
 

@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo run dev --filter=!@jewellery-retail/backend",
     "dev:all": "turbo run dev --filter=!@jewellery-retail/backend",
-    "dev:storefront": "turbo run dev",
+    "dev:storefront": "turbo run dev --filter=mmj-web",
     "dev:backend": "turbo run dev --filter=@jewellery-retail/backend",
     "build": "turbo run build",
     "start": "turbo run start",
@@ -17,6 +17,7 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
+    "tailwindcss": "^3.4.0",
     "turbo": "^2.0.0"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
   },
   "overrides": {
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "tailwindcss": "^3.4.0"
   }
 }

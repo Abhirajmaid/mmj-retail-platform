@@ -17,6 +17,7 @@ import { useBillingDashboard } from "@jewellery-retail/hooks";
 import {
   Badge,
   Card,
+  Loader,
   StatCard,
   Table,
   TableBody,
@@ -28,7 +29,30 @@ import {
 import { dateFormat, formatCompactNumber, formatCurrency, statusColor } from "@jewellery-retail/utils";
 
 export default function BillingDashboardPage() {
-  const { data, isLoading } = useBillingDashboard();
+  const { data, isLoading, error } = useBillingDashboard();
+
+  if (error) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-red-800">
+        <p className="font-medium">Failed to load dashboard</p>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (isLoading && (!data || (data.recentTransactions?.length === 0 && data.monthlyRevenue === 0))) {
+    return <Loader label="Loading dashboard…" size="lg" />;
+  }
+
+  const safe = data ?? {
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    pendingInvoices: 0,
+    activeCustomers: 0,
+    monthlyRevenueSeries: [],
+    customerGrowthSeries: [],
+    recentTransactions: [],
+  };
 
   return (
     <div className="space-y-6">
@@ -44,7 +68,7 @@ export default function BillingDashboardPage() {
               </Badge>
               <div>
                 <p className="text-sm text-white/70">Total balance handled this month</p>
-                <p className="mt-2 text-4xl font-semibold text-white">{formatCurrency(data.monthlyRevenue)}</p>
+                <p className="mt-2 text-4xl font-semibold text-white">{formatCurrency(safe.monthlyRevenue)}</p>
               </div>
               <p className="max-w-xl text-sm leading-6 text-white/70">
                 Stay on top of invoices, monthly collections, and customer activity with a cleaner control center inspired by modern finance dashboards.
@@ -52,7 +76,7 @@ export default function BillingDashboardPage() {
             </div>
             <div className="rounded-[24px] border border-white/10 bg-white/10 px-5 py-4 shadow-none">
               <p className="text-xs uppercase tracking-[0.22em] text-white/55">Pending</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{data.pendingInvoices}</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{safe.pendingInvoices}</p>
             </div>
           </div>
         </Card>
@@ -61,13 +85,13 @@ export default function BillingDashboardPage() {
           <Card className="p-5">
             <p className="text-sm text-zinc-500">Collected today</p>
             <p className="mt-3 text-3xl font-semibold text-zinc-950">
-              {formatCurrency(data.recentTransactions[0]?.amount ?? 0)}
+              {formatCurrency(safe.recentTransactions[0]?.amount ?? 0)}
             </p>
             <p className="mt-2 text-sm text-emerald-600">+12% vs yesterday</p>
           </Card>
           <Card className="p-5">
             <p className="text-sm text-zinc-500">Transactions</p>
-            <p className="mt-3 text-3xl font-semibold text-zinc-950">{data.recentTransactions.length}</p>
+            <p className="mt-3 text-3xl font-semibold text-zinc-950">{safe.recentTransactions.length}</p>
             <p className="mt-2 text-sm text-zinc-500">Recent activity synced from shared hooks</p>
           </Card>
           <Card className="p-5">
@@ -77,7 +101,7 @@ export default function BillingDashboardPage() {
           </Card>
           <Card className="p-5">
             <p className="text-sm text-zinc-500">Customer health</p>
-            <p className="mt-3 text-3xl font-semibold text-zinc-950">{formatCompactNumber(data.activeCustomers)}</p>
+            <p className="mt-3 text-3xl font-semibold text-zinc-950">{formatCompactNumber(safe.activeCustomers)}</p>
             <p className="mt-2 text-sm text-zinc-500">Active accounts with recent purchases</p>
           </Card>
         </div>
@@ -86,28 +110,28 @@ export default function BillingDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total revenue"
-          value={formatCurrency(data.totalRevenue)}
+          value={formatCurrency(safe.totalRevenue)}
           description="All-time collected revenue"
           trend="+18.6%"
           icon={IndianRupee}
         />
         <StatCard
           title="Monthly revenue"
-          value={formatCurrency(data.monthlyRevenue)}
+          value={formatCurrency(safe.monthlyRevenue)}
           description="Current month recognized revenue"
           trend="+6.4%"
           icon={ArrowUpRight}
         />
         <StatCard
           title="Pending invoices"
-          value={String(data.pendingInvoices)}
+          value={String(safe.pendingInvoices)}
           description="Awaiting payment follow-up"
           trend="-2 this week"
           icon={Receipt}
         />
         <StatCard
           title="Active customers"
-          value={formatCompactNumber(data.activeCustomers)}
+          value={formatCompactNumber(safe.activeCustomers)}
           description="Customers with recent activity"
           trend="+9% this month"
           icon={Users}
@@ -125,7 +149,7 @@ export default function BillingDashboardPage() {
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.monthlyRevenueSeries}>
+              <BarChart data={safe.monthlyRevenueSeries}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(value)} />
@@ -143,7 +167,7 @@ export default function BillingDashboardPage() {
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.customerGrowthSeries}>
+              <LineChart data={safe.customerGrowthSeries}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
@@ -163,7 +187,7 @@ export default function BillingDashboardPage() {
           </div>
           <Badge variant="success">
             <CreditCard className="mr-1 h-3.5 w-3.5" />
-            {formatCurrency(data.recentTransactions.reduce((total, item) => total + item.amount, 0))}
+            {formatCurrency(safe.recentTransactions.reduce((total, item) => total + item.amount, 0))}
           </Badge>
         </div>
         <Table>
@@ -178,7 +202,7 @@ export default function BillingDashboardPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.recentTransactions.map((payment) => (
+            {safe.recentTransactions.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell className="font-medium text-zinc-950">{payment.customerName}</TableCell>
                 <TableCell>{payment.invoiceNumber}</TableCell>

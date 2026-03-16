@@ -1,12 +1,10 @@
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
+import { cn } from "../lib/utils";
 
 export function Table({ children, className = "", ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto rounded-[24px] bg-transparent">
-      <table
-        className={`w-full border-collapse text-sm text-zinc-700 ${className}`}
-        {...props}
-      >
+    <div className="overflow-x-auto rounded-lg border border-zinc-200/80 bg-white/90 shadow-md transition-shadow duration-300 backdrop-blur-xl">
+      <table className={cn("w-full min-w-full table-auto overflow-hidden rounded-lg border-collapse text-sm", className)} {...props}>
         {children}
       </table>
     </div>
@@ -15,7 +13,13 @@ export function Table({ children, className = "", ...props }: HTMLAttributes<HTM
 
 export function TableHead({ children, className = "", ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <thead className={`bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400 ${className}`} {...props}>
+    <thead
+      className={cn(
+        "border-b border-orange-200/70 bg-gray-300/30 shadow-sm backdrop-blur-lg",
+        className
+      )}
+      {...props}
+    >
       {children}
     </thead>
   );
@@ -23,15 +27,29 @@ export function TableHead({ children, className = "", ...props }: HTMLAttributes
 
 export function TableBody({ children, className = "", ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <tbody className={`divide-y divide-zinc-100 ${className}`} {...props}>
+    <tbody
+      className={cn("divide-y divide-zinc-100 bg-white/80 backdrop-blur-sm", className)}
+      {...props}
+    >
       {children}
     </tbody>
   );
 }
 
-export function TableRow({ children, className = "", ...props }: HTMLAttributes<HTMLTableRowElement>) {
+export function TableRow({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={`transition hover:bg-orange-50/40 ${className}`} {...props}>
+    <tr
+      className={cn(
+        "border-b border-zinc-100/80 transition-all duration-300 group last:border-b-0",
+        "hover:shadow-sm",
+        className
+      )}
+      {...props}
+    >
       {children}
     </tr>
   );
@@ -39,7 +57,14 @@ export function TableRow({ children, className = "", ...props }: HTMLAttributes<
 
 export function TableHeader({ children, className = "", ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <th className={`px-5 py-4 text-left ${className}`} {...props}>
+    <th
+      className={cn(
+        "px-6 py-5 text-left text-xs font-black uppercase tracking-wider text-gray-800",
+        "first:rounded-tl-lg last:rounded-tr-lg shadow-sm",
+        className
+      )}
+      {...props}
+    >
       {children}
     </th>
   );
@@ -47,7 +72,13 @@ export function TableHeader({ children, className = "", ...props }: ThHTMLAttrib
 
 export function TableCell({ children, className = "", ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={`px-5 py-4 ${className}`} {...props}>
+    <td
+      className={cn(
+        "px-6 py-4 text-sm text-gray-800 transition-colors duration-300 group-hover:text-gray-900",
+        className
+      )}
+      {...props}
+    >
       {children}
     </td>
   );

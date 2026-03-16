@@ -34,7 +34,7 @@ async function setDefaultPermissions(strapi: Core.Strapi) {
   const erpCollections = [
     'order', 'customer', 'invoice', 'inventory', 'supplier',
     // New ERP content types
-    'store', 'jewellery-item', 'stone', 'stone-inventory',
+    'store', 'firm', 'jewellery-item', 'stone', 'stone-inventory',
     'purchase-order', 'purchase-item',
     'sale', 'sale-item', 'payment',
     'custom-order', 'repair',
