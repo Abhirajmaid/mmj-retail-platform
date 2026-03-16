@@ -2,7 +2,7 @@ export { cn } from "./lib/utils";
 
 export { Button, buttonVariants } from "./components/button";
 export { Input } from "./components/input";
-export { PageHeader } from "./components/page-header";
+export { PageHeader, type BreadcrumbItem } from "./components/page-header";
 export { StatCard } from "./components/stat-card";
 export { Navbar } from "./components/navbar";
 export { Sidebar } from "./components/sidebar";
@@ -62,6 +62,7 @@ export {
   TableHeader,
   TableRow,
 } from "./components/table";
+export { EmptyState } from "./components/empty-state";
 export { Loader, PageLoader } from "./feedback/loader";
 export { SingleLink } from "./navigation/single-link";
 export { PaginationControls } from "./navigation/pagination-controls";

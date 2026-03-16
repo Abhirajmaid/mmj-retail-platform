@@ -18,7 +18,7 @@ export default {
       if (!jewelleryItemId) return;
 
       await strapi.entityService.update('api::jewellery-item.jewellery-item', jewelleryItemId, {
-        data: { status: 'sold' },
+        data: { status: 'sold' } as any,
       });
 
       strapi.log.info(`[sale-item.afterCreate] Jewellery item #${jewelleryItemId} marked as sold`);

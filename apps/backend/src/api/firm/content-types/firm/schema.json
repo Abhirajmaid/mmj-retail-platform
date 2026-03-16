@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "firms",
+  "info": {
+    "singularName": "firm",
+    "pluralName": "firms",
+    "displayName": "Firm",
+    "description": "Firm or branch for invoices and forms"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "firmId": { "type": "string", "required": true },
+    "registrationNo": { "type": "string", "required": true },
+    "shopName": { "type": "string", "required": true },
+    "firmDescription": { "type": "text" },
+    "address": { "type": "text" },
+    "city": { "type": "string" },
+    "pincode": { "type": "string" },
+    "phone": { "type": "string" },
+    "email": { "type": "string" },
+    "website": { "type": "string" },
+    "myFirms": { "type": "string" },
+    "firmType": { "type": "enumeration", "enum": ["SELF", "PARTNER", "BRANCH"], "default": "SELF" },
+    "commentsOtherInfo": { "type": "text" },
+    "paymentBankDetails": { "type": "string" },
+    "paymentBankAcNo": { "type": "string" },
+    "paymentBankIfsc": { "type": "string" },
+    "paymentDeclaration": { "type": "text" },
+    "financialYearStart": { "type": "string" },
+    "cashBalance": { "type": "decimal" },
+    "cashBalanceCr": { "type": "boolean", "default": false },
+    "gstinNo": { "type": "string" },
+    "panNumber": { "type": "string" },
+    "principalAmtFrom": { "type": "decimal" },
+    "principalAmtTo": { "type": "decimal" },
+    "formHeader": { "type": "string" },
+    "formFooter": { "type": "text" },
+    "principalStartAmount": { "type": "decimal" },
+    "principalEndAmount": { "type": "decimal" },
+    "formLeftImage": { "type": "text" },
+    "formRightLogo": { "type": "text" },
+    "formRightImage": { "type": "text" },
+    "ownerSignature": { "type": "text" },
+    "qrCodeImage": { "type": "text" },
+    "status": { "type": "enumeration", "enum": ["active", "pending_review", "inactive"], "default": "active" }
+  }
+}

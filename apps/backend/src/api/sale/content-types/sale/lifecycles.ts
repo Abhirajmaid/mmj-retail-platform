@@ -45,7 +45,7 @@ export default {
         await strapi.entityService.update('api::customer.customer', customerId, {
           data: {
             loyalty_points: (customer?.loyalty_points ?? 0) + pointsEarned,
-          },
+          } as any,
         });
       }
     } catch (err) {

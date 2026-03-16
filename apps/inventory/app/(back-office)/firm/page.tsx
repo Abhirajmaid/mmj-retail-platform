@@ -1,25 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, LayoutGrid, List, Plus } from "lucide-react";
 import { useFirmStore } from "@/src/store/firm-store";
-import { Button, PageHeader, StatCard } from "@jewellery-retail/ui";
+import { Button, Loader, PageHeader } from "@jewellery-retail/ui";
 import { FirmCard } from "@/src/components/firm/FirmCard";
 import { FirmTable } from "@/src/components/firm/FirmTable";
+import { FirmKPIs } from "@/src/components/firm/FirmKPIs";
 import { Building2, CheckCircle, Clock, Users } from "lucide-react";
 
 export default function FirmPage() {
-  const { firms, deleteFirm, canAddFirm } = useFirmStore();
+  const router = useRouter();
+  const { firms, deleteFirm, canAddFirm, fetchFirms, loading, error, clearError } =
+    useFirmStore();
   const [view, setView] = useState<"gallery" | "table">("gallery");
+
+  useEffect(() => {
+    fetchFirms();
+  }, [fetchFirms]);
 
   const totalFirms = firms.length;
   const activeFirms = firms.filter((f) => f.status === "active").length;
   const pendingReview = firms.filter((f) => f.status === "pending_review").length;
   const selfFirms = firms.filter((f) => f.firmType === "SELF").length;
 
+  const statusStats = [
+    {
+      label: "Total",
+      count: totalFirms,
+      icon: Building2,
+      color: "bg-amber-50",
+      borderColor: "border-amber-200",
+      iconColor: "text-amber-600",
+    },
+    {
+      label: "Active",
+      count: activeFirms,
+      icon: CheckCircle,
+      color: "bg-emerald-50",
+      borderColor: "border-emerald-200",
+      iconColor: "text-emerald-600",
+    },
+    {
+      label: "Pending",
+      count: pendingReview,
+      icon: Clock,
+      color: "bg-yellow-50",
+      borderColor: "border-yellow-200",
+      iconColor: "text-yellow-600",
+    },
+    {
+      label: "Self",
+      count: selfFirms,
+      icon: Users,
+      color: "bg-blue-50",
+      borderColor: "border-blue-200",
+      iconColor: "text-blue-600",
+    },
+  ];
+
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
+      {error && (
+        <div className="flex items-center justify-between rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+          <span>{error}</span>
+          <button type="button" onClick={clearError} className="underline">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {totalFirms >= 2 && (
         <div className="flex items-center justify-center gap-2 rounded-lg bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-800">
           <AlertTriangle className="h-5 w-5 shrink-0" />
@@ -64,34 +116,13 @@ export default function FirmPage() {
         }
       />
 
-      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-        <StatCard
-          title="Total Firms"
-          value={String(totalFirms)}
-          description="All firms and branches"
-          icon={Building2}
-        />
-        <StatCard
-          title="Active Firms"
-          value={String(activeFirms)}
-          description="Currently active"
-          icon={CheckCircle}
-        />
-        <StatCard
-          title="Pending Review"
-          value={String(pendingReview)}
-          description="Awaiting review"
-          icon={Clock}
-        />
-        <StatCard
-          title="Self Firms"
-          value={String(selfFirms)}
-          description="Self type only"
-          icon={Users}
-        />
-      </div>
+      <FirmKPIs statusStats={statusStats} />
 
-      {view === "gallery" ? (
+      {loading && firms.length === 0 ? (
+        <div className="flex min-h-[200px] items-center justify-center">
+          <Loader size="lg" label="Loading firms" className="h-48" />
+        </div>
+      ) : view === "gallery" ? (
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
           {firms.map((firm) => (
             <FirmCard key={firm.id} firm={firm} onDelete={deleteFirm} />
@@ -103,7 +134,13 @@ export default function FirmPage() {
           )}
         </div>
       ) : (
-        <FirmTable firms={firms} onDelete={deleteFirm} />
+        <FirmTable
+          firms={firms}
+          onDelete={deleteFirm}
+          activeView="list"
+          onViewChange={(v) => setView(v === "gallery" ? "gallery" : "table")}
+          onAddClick={() => router.push("/firm/add")}
+        />
       )}
     </div>
   );
