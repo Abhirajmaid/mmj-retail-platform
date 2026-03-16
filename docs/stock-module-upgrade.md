@@ -7,26 +7,28 @@
 - **Two-panel layout**: Left sidebar (desktop) lists unique product names with search; main area shows the stock table.
 - **Product sidebar**: Fixed width `w-56`, "Products" header, search input that filters both the sidebar list and the main table. Each item shows product name, SKU, and total stock quantity (amber pill). Clicking an item scrolls to that product’s section in the table and highlights the group.
 - **Mobile**: Sidebar becomes a horizontal scrollable chip row above the table.
-- **Grouped table**: Movements grouped by product with collapsible group header rows (amber/cream background, product name + SKU + total qty + chevron). All groups expanded by default.
-- **Filter bar**: Movement type (All | Inbound | Outbound | Transfer), status (All | Completed | Pending), and date range (From → To). Summary stats row: Total Movements, Total Inbound, Total Outbound, Total Pending.
+- **Flat table**: One row per stock movement (item). Each row shows PRODUCT (name + SKU), MOVEMENT, LOCATION, STATUS, DATE, QUANTITY. No grouping or expand/collapse; 100 movements = 100 rows. Pagination (15 per page) with Previous/Next and “Showing 1–15 of N” when applicable. Table styling matches the Firm table (white card, header row, “Showing X results”).
+- **Filter bar**: Movement type (All | Inbound | Outbound | Transfer) and product search, plus a dedicated **Filter** circular button that opens a Stock filter modal with From/To date filters (matching the Firm filter UX). Summary stats row: Total Movements, Total Inbound, Total Outbound, Total Pending.
+- **Tabs UI alignment**: Stock movement filter pills and top search controls now use the same rounded amber tab styling and search input treatment as the Firm list tabs for visual consistency, including the circular action buttons (Add, filter, column visibility) and the Export pill on the right.
 - **Add Stock** button now links to `/stock/add` instead of opening a modal.
 
 ### Add Stock Page (`/stock/add`)
 
-- **Single page, 6 tabs**: Fine Stock, Imitation Stock, Raw Metal Stock, Crystal Stock, Stock Reports, Other Options. Tab bar is sticky, amber background (`bg-amber-400/90`). Switching tabs only changes content below; no route change.
-- **Fine Stock tab**: Header row (Bill Date, Firm, Metal/Rate, Product Code, Brand/Seller, Counter, Gender BIS, Img/Photos), secondary row (Barcode, Hallmark UID, MFG Date), product detail row (Category through MKG CHRG), second detail row with DETAILS and STONE buttons. **VALUATION**, **TOT LAB**, and **FINAL AMT** are editable number inputs (placeholders show computed values from ntWt/metalRate and lbrChrg/mkgChrg; user can override). STONE button toggles an inline **Stone Detail Row** (crystal columns, ➕/🗑️ for multiple stones). Bottom actions: ADD STOCK, EXISTING ITEM, PURCHASE ON CASH, HALLMARKING, HELP, SUBMIT. On SUBMIT, entries go to a **pending review table** below the form; user must click ADD on each row to confirm adding to stock.
-- **Imitation Stock tab**: Same as Fine Stock with "Imitation" section label.
-- **Raw Metal Stock tab**: Bill Date, Firm, Brand/Seller; metal details table (Gold/Raw Gold rows, weights, purity, taxes). Single SUBMIT; same review-then-ADD pattern.
-- **Crystal Stock tab**: Bill Date, Firm, Item ID, Brand/Seller, Gender, Images; crystal details table. ADD STOCK, PURCHASE ON CASH, SUBMIT; same review pattern.
-- **Stock Reports tab**: Read-only table same as main stock page (grouped, same columns and filter bar), plus Export CSV and Print.
-- **Other Options tab**: Dropdown-style card with 6 options (Stock Setting, Stock Master, Stock Transfer, Discount Option, Setup Option, Multiple Stock Delete). Selecting an option shows a “Coming Soon” placeholder panel.
+- **UI aligned with Add New Firm**: Breadcrumbs (Dashboard > Stock > Add Stock), PageHeader with title, description, and HELP button. No single wrapper card; each tab uses the same card-based layout as the firm form (cards with icon, title, subtitle; same input styling and Cancel/Submit footer).
+- **Single page, 5 tabs in bar**: Fine Stock, Raw Metal Stock, Crystal Stock, Stock Reports, Other Options (dropdown). Tab bar uses amber background and sliding pill indicator.
+- **Fine Stock tab**: Card 1 — Bill/header (date, firm, metal/rate, product code, brand, counter, gender, photos, barcode, hallmark, mfg date) + RETAIL STOCK. Card 2 — Product & item details (category/weights/purity grid, DETAILS/STONE, VALUATION/TOT LAB/FINAL AMT, optional stone row). Required-fields note; Cancel + Submit footer; review card with ADD STOCK/Delete per row. (Imitation: same with “Imitation” section title.)
+- **Raw Metal Stock tab**: Card 1 — Bill/header. Card 2 — Metal details (type, qty, weights, purity, taxes). Same footer and review pattern.
+- **Crystal Stock tab**: Card 1 — Bill/header + RETAIL STOCK. Card 2 — Crystal details (name, size, color, tax, qty/weights/rates). Cancel, Purchase on Cash, Submit; same review pattern.
+- **Stock Reports tab**: Single card with icon, Export CSV and Print in header, read-only StockTable in body.
+- **Other Options**: Dropdown-style card with 6 options (Stock Setting, Stock Master, Stock Transfer, Discount Option, Setup Option, Multiple Stock Delete). Selecting an option shows a “Coming Soon” placeholder panel.
 
 ### New / Modified Files
 
 - `apps/inventory/src/types/stock.ts` — All stock TypeScript types (MovementType, StockStatus, StockTab, MetalType, StoneDetail, FineStockEntry, RawMetalEntry, CrystalEntry, constants).
 - `apps/inventory/src/store/stock-store.ts` — Zustand slices: `useFineStockStore`, `useRawMetalStore`, `useCrystalStore` (pendingEntries, confirmedEntries, addPending, confirmEntry, deletePending); `createEmptyStoneDetail` helper.
 - `apps/inventory/src/components/stock/StockProductSidebar.tsx` — Left product navigator with search; `variant="sidebar"` (desktop) or `variant="chips"` (mobile).
-- `apps/inventory/src/components/stock/StockTable.tsx` — Grouped, collapsible table with filter bar and summary stats.
+- `apps/inventory/src/components/stock/StockTable.tsx` — Flat table (one row per movement), filter bar, pagination, Firm-like header and styling.
+- `apps/inventory/src/components/stock/StockFilterModal.tsx` — Modal for From/To date filters, mirroring the Firm filter UX, opened via the Filter button in the Stock top bar.
 - `apps/inventory/src/components/stock/StockStoneRow.tsx` — Inline expandable stone detail grid (crystal ID/name, clarity, color, cert, lab, size, shape, qty, weights, rates, valuation, ➕/🗑️).
 - `apps/inventory/src/components/stock/tabs/FineStockTab.tsx` — Fine/Imitation form and review table.
 - `apps/inventory/src/components/stock/tabs/RawMetalStockTab.tsx` — Raw metal form and review table.

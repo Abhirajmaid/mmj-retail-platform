@@ -2,13 +2,14 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Minus, Plus } from "lucide-react";
+import { ArrowLeftRight, ArrowDownCircle, ArrowUpCircle, Clock, Minus, Package, Plus } from "lucide-react";
 
 import { useStockMovements } from "@jewellery-retail/hooks";
 import { Button, PageHeader } from "@jewellery-retail/ui";
 import type { StockMovement } from "@jewellery-retail/types";
 import type { StockMovementView } from "@/src/types/stock";
 import { StockTable } from "@/src/components/stock/StockTable";
+import { StockKPIs } from "@/src/components/stock/StockKPIs";
 
 function toView(m: StockMovement): StockMovementView {
   return {
@@ -23,6 +24,49 @@ export default function StockPage() {
   const movements: StockMovementView[] = useMemo(
     () => data.map(toView),
     [data]
+  );
+
+  const totalMovements = movements.length;
+  const inboundCount = movements.filter((m) => m.type === "inbound").length;
+  const outboundCount = movements.filter((m) => m.type === "outbound").length;
+  const pendingCount = movements.filter((m) => m.status === "pending").length;
+
+  const statusStats = useMemo(
+    () => [
+      {
+        label: "Total",
+        count: totalMovements,
+        icon: Package,
+        color: "bg-amber-50",
+        borderColor: "border-amber-200",
+        iconColor: "text-amber-600",
+      },
+      {
+        label: "Inbound",
+        count: inboundCount,
+        icon: ArrowDownCircle,
+        color: "bg-emerald-50",
+        borderColor: "border-emerald-200",
+        iconColor: "text-emerald-600",
+      },
+      {
+        label: "Outbound",
+        count: outboundCount,
+        icon: ArrowUpCircle,
+        color: "bg-blue-50",
+        borderColor: "border-blue-200",
+        iconColor: "text-blue-600",
+      },
+      {
+        label: "Pending",
+        count: pendingCount,
+        icon: Clock,
+        color: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+        iconColor: "text-yellow-600",
+      },
+    ],
+    [totalMovements, inboundCount, outboundCount, pendingCount]
   );
 
   return (
@@ -49,6 +93,8 @@ export default function StockPage() {
           </div>
         }
       />
+
+      <StockKPIs statusStats={statusStats} />
 
       {/* Single area: click a stock row to open; details (product, location, etc.) show exactly below it */}
       <div className="min-w-0">

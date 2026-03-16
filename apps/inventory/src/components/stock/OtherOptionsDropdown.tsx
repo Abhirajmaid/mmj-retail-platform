@@ -4,14 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 
-const OPTIONS = [
-  "STOCK SETTING",
-  "STOCK MASTER",
-  "STOCK TRANSFER",
-  "DISCOUNT OPTION",
-  "SETUP OPTION",
-  "MULTIPLE STOCK DELETE",
-] as const;
+const OPTIONS: { value: string; label: string }[] = [
+  { value: "STOCK SETTING", label: "Stock setting" },
+  { value: "STOCK MASTER", label: "Stock master" },
+  { value: "STOCK TRANSFER", label: "Stock transfer" },
+  { value: "DISCOUNT OPTION", label: "Discount option" },
+  { value: "SETUP OPTION", label: "Setup option" },
+  { value: "MULTIPLE STOCK DELETE", label: "Multiple stock delete" },
+];
 
 export function OtherOptionsDropdown({
   onSelect,
@@ -54,42 +54,40 @@ export function OtherOptionsDropdown({
           }
           setOpen((p) => !p);
         }}
-        className={`flex min-h-10 items-center gap-1.5 px-4 py-2.5 text-sm font-bold uppercase tracking-wide transition-all duration-150 md:px-6 ${
-          open ? "bg-white text-black" : "text-black hover:bg-[#FEF3C7]"
+        className={`flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+          open
+            ? "bg-amber-500 text-white shadow-md"
+            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800"
         }`}
       >
-        OTHER OPTIONS
+        Other options
         <ChevronDown
           className={`h-4 w-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
-      {/* Render dropdown in portal so it's not clipped by tab bar overflow-x-auto */}
+      {/* Dropdown panel — matches app cards: rounded-xl, border-zinc-100, shadow */}
       {open &&
         typeof document !== "undefined" &&
         createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[100] mt-0 min-w-0 overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+            className="fixed z-[100] mt-1 min-w-[200px] overflow-hidden rounded-xl border border-zinc-100 bg-white py-1 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
             style={{ top: position.top, left: position.left }}
           >
-            <div className="border-l-4 border-amber-400 p-2">
-              <div className="flex flex-col gap-1.5">
-                {OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => {
-                      onSelect?.(opt);
-                      setOpen(false);
-                    }}
-                    className="rounded-lg border border-amber-200 bg-white px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide text-gray-900 shadow-sm transition-colors duration-150 hover:border-amber-300 hover:bg-[#FEF3C7] hover:text-amber-700 sm:text-sm"
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  onSelect?.(value);
+                  setOpen(false);
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 hover:text-amber-800"
+              >
+                {label}
+              </button>
+            ))}
           </div>,
           document.body
         )}
