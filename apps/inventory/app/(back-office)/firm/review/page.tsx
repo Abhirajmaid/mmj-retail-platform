@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
 import { Button } from "@jewellery-retail/ui";
 import { useFirmStore } from "@/src/store/firm-store";
 import { FirmReviewCard } from "@/src/components/firm/FirmReviewCard";
@@ -12,10 +11,6 @@ export default function FirmReviewPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-col items-center gap-4 text-center">
-        <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-800">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          YOU CAN ADD ONLY 2 FIRM!
-        </div>
         <h1 className="text-2xl font-bold uppercase tracking-tight text-zinc-950">
           MY FIRMS
         </h1>

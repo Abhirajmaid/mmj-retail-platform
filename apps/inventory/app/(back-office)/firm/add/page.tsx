@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { HelpCircle } from "lucide-react";
+import { CheckCircle2, HelpCircle } from "lucide-react";
 import { Button, PageHeader } from "@jewellery-retail/ui";
 import { useFirmStore } from "@/src/store/firm-store";
 import { FirmForm } from "@/src/components/firm/FirmForm";
@@ -20,6 +20,7 @@ export default function AddFirmPage() {
   const error = useFirmStore((s) => s.error);
   const clearError = useFirmStore((s) => s.clearError);
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (data: Partial<Firm>) => {
     clearError();
@@ -33,12 +34,35 @@ export default function AddFirmPage() {
         firmType: data.firmType ?? "SELF",
         status: data.status ?? "active",
       } as Omit<Firm, "id" | "createdAt" | "updatedAt">);
-      if (firm) router.push("/firm");
-      else if (!useFirmStore.getState().error) router.push("/firm/review");
+
+      if (firm) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          router.push("/firm");
+        }, 2000);
+      } else if (!useFirmStore.getState().error) {
+        router.push("/firm/review");
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-emerald-500" />
+          <h2 className="mb-2 text-2xl font-bold text-zinc-950">Success!</h2>
+          <p className="mb-4 text-zinc-600">Firm added successfully</p>
+          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-amber-500" />
+          <p className="mt-2 text-sm text-zinc-500">
+            Redirecting to firm list...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">

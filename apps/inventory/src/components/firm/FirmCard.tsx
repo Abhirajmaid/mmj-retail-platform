@@ -1,97 +1,106 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Mail, Phone, Pencil, Trash2 } from "lucide-react";
-import { Badge, Button, Card } from "@jewellery-retail/ui";
+import { Mail, Phone, Pencil, Trash2 } from "lucide-react";
+import { Button, Card, CardBody, CardFooter, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import type { Firm } from "@/src/types/firm";
+import { getInitial, statusLabel, statusPillClass } from "./firmTableColumns";
 
 interface FirmCardProps {
   firm: Firm;
   onDelete: (id: string) => void;
 }
 
-function getInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .map((s) => s[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
 export function FirmCard({ firm, onDelete }: FirmCardProps) {
-  const initials = getInitials(firm.shopName || firm.firmId);
+  const initial = getInitial(firm.shopName || firm.firmId || "F");
+  const displayName = firm.shopName || firm.firmId || "Unnamed firm";
+  const contactLine = firm.email || firm.phone || "No contact";
 
   return (
-    <Card className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-      <div className="p-4">
-        <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-sm font-semibold text-amber-700">
+    <Card
+      padding="none"
+      className="overflow-hidden rounded-lg bg-white p-5 shadow-md transition-shadow hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-4px_rgba(0,0,0,0.06)]"
+    >
+      <CardHeader className="mb-0 border-b border-zinc-100 px-0 pb-4 pt-0">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold text-zinc-700">
             {firm.formRightLogo ? (
               <img
                 src={firm.formRightLogo}
                 alt=""
-                className="h-full w-full rounded-xl object-cover"
+                className="h-full w-full rounded-full object-cover"
               />
             ) : (
-              initials || <Building2 className="h-6 w-6" />
+              initial
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-semibold text-zinc-950">{firm.shopName || firm.firmId}</h3>
-            <p className="text-xs text-zinc-500">ID: {firm.firmId}</p>
-            <Badge
-              className="mt-1 border-0 bg-amber-100 text-amber-800"
-              variant="default"
-            >
-              {firm.firmType}
-            </Badge>
+            <CardTitle className="truncate text-base font-semibold text-zinc-900">
+              {displayName}
+            </CardTitle>
+            <p className="mt-0.5 text-sm text-zinc-500">{contactLine}</p>
+            <span className={`mt-2 inline-block ${statusPillClass(firm.status)}`}>
+              {statusLabel(firm.status)}
+            </span>
           </div>
         </div>
-        <dl className="space-y-1 text-sm text-zinc-600">
-          <div>
-            <span className="text-zinc-400">Reg No:</span> {firm.registrationNo || "—"}
-          </div>
-          <div>
-            <span className="text-zinc-400">GSTIN:</span> {firm.gstinNo || "—"}
-          </div>
-          {firm.phone && (
-            <div className="flex items-center gap-1">
-              <Phone className="h-3.5 w-3.5" />
-              {firm.phone}
-            </div>
-          )}
-          {firm.email && (
-            <div className="flex items-center gap-1 truncate">
-              <Mail className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{firm.email}</span>
-            </div>
-          )}
+      </CardHeader>
+
+      <CardBody className="px-0 py-4">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
+          <dt className="text-zinc-500">Firm type</dt>
+          <dd className="font-medium text-zinc-800">{firm.firmType}</dd>
+          <dt className="text-zinc-500">Reg No</dt>
+          <dd className="text-zinc-700">{firm.registrationNo || "—"}</dd>
+          <dt className="text-zinc-500">GSTIN</dt>
+          <dd className="truncate text-zinc-700">{firm.gstinNo || "—"}</dd>
         </dl>
-        <div className="mt-4 flex min-h-[44px] items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-amber-200 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
-            asChild
-          >
-            <Link href={`/firm/edit/${firm.id}`}>
-              <Pencil className="mr-1 h-3.5 w-3.5" />
-              Edit
-            </Link>
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="min-h-[44px] min-w-[44px] px-2"
-            onClick={() => onDelete(firm.id)}
-            aria-label="Delete firm"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+        {(firm.email || firm.phone) && (
+          <div className="mt-3 flex flex-col gap-1.5 border-t border-zinc-100 pt-3">
+            {firm.email && (
+              <a
+                href={`mailto:${firm.email}`}
+                className="flex items-center gap-2 truncate text-xs text-zinc-600 hover:text-amber-600"
+              >
+                <Mail className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                <span className="truncate">{firm.email}</span>
+              </a>
+            )}
+            {firm.phone && (
+              <a
+                href={`tel:${firm.phone}`}
+                className="flex items-center gap-2 text-xs text-zinc-600 hover:text-amber-600"
+              >
+                <Phone className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                {firm.phone}
+              </a>
+            )}
+          </div>
+        )}
+      </CardBody>
+
+      <CardFooter className="flex gap-2 border-t border-zinc-100 px-0 pt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 flex-1 rounded-md border-zinc-300 bg-zinc-50/80 text-zinc-700 shadow-sm hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700"
+          asChild
+        >
+          <Link href={`/firm/edit/${firm.id}`}>
+            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+            Edit
+          </Link>
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="h-9 w-9 shrink-0 rounded-md shadow-sm"
+          onClick={() => onDelete(firm.id)}
+          aria-label="Delete firm"
+        >
+          <Trash2 className="h-8 w-8" />
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

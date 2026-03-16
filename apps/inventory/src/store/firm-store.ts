@@ -2,8 +2,6 @@ import { create } from "zustand";
 import type { Firm } from "@/src/types/firm";
 import * as firmsApi from "@/src/lib/api/firms";
 
-const MAX_FIRMS_LOCAL = 2;
-
 function newId(): string {
   return crypto.randomUUID?.() ?? `firm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -55,17 +53,14 @@ export const useFirmStore = create<FirmState>((set, get) => ({
       set((s) => ({ error: error }));
     }
     const firms = get().firms;
-    if (firms.length < MAX_FIRMS_LOCAL) {
-      const firm: Firm = {
-        ...payload,
-        id: newId(),
-        createdAt: now(),
-        updatedAt: now(),
-      };
-      set((s) => ({ firms: [firm, ...s.firms] }));
-      return firm;
-    }
-    return null;
+    const firm: Firm = {
+      ...payload,
+      id: newId(),
+      createdAt: now(),
+      updatedAt: now(),
+    };
+    set((s) => ({ firms: [firm, ...s.firms] }));
+    return firm;
   },
 
   updateFirm: async (id, data) => {
@@ -119,7 +114,7 @@ export const useFirmStore = create<FirmState>((set, get) => ({
     return null;
   },
 
-  canAddFirm: () => get().firms.length < MAX_FIRMS_LOCAL,
+  canAddFirm: () => true,
 
   clearError: () => set({ error: null }),
 }));

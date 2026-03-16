@@ -5,19 +5,19 @@
 - **New "Firm" section** in the Inventory app (back-office) for managing firms and branches.
 - **Sidebar**: Added "Firm" between "Stock" and "Suppliers" with building icon.
 - **Pages**:
-  - **Firm listing** (`/firm`): Table and gallery view toggle, stats (Total / Active / Pending Review / Self Firms), "Add Firm" and "Toggle View" buttons. Banner when firm count is 2: "YOU CAN ADD ONLY 2 FIRMS!".
+  - **Firm listing** (`/firm`): Table and gallery view toggle, stats (Total / Active / Pending Review / Self Firms), "Add Firm" and "Toggle View" buttons.
   - **Add Firm** (`/firm/add`): Full 3-column form (Firm/Company Details, Forms Details, Company Logo & uploads). All 40+ fields from the reference design, 5 image uploads, financial year dropdowns, CR toggle for cash balance. "Submit for Review" and "Save / Add Firm" actions.
   - **Edit Firm** (`/firm/edit/[id]`): Same form with pre-filled data; "Save / Update Firm" on submit.
-  - **My Firms / Review** (`/firm/review`): Table of firms (Firm Name with avatar, Firm Type, Delete). Same max-2-firms banner. Delete from list.
+  - **My Firms / Review** (`/firm/review`): Table of firms (Firm Name with avatar, Firm Type, Delete). Delete from list.
 - **Components**: `FirmCard`, `FirmTable`, `FirmForm`, `ImageUpload`, `FirmReviewCard` under `apps/inventory/src/components/firm/`.
-- **State**: Zustand store `useFirmStore` in `apps/inventory/src/store/firm-store.ts` with `addFirm`, `updateFirm`, `deleteFirm`, `setFirms`, `getFirmById`, `canAddFirm`. Max 2 firms enforced in store.
+- **State**: Zustand store `useFirmStore` in `apps/inventory/src/store/firm-store.ts` with `addFirm`, `updateFirm`, `deleteFirm`, `setFirms`, `getFirmById`, `canAddFirm`. No firm count limit.
 - **Types**: `Firm` and related types in `apps/inventory/src/types/firm.ts`.
 
 ## Why
 
 - Central place to manage multiple firms/branches (e.g. PP, RP, SR) with full company, forms, and logo/signature/QR image data.
 - Aligns UI with the provided reference (3-column panel, HELP, required fields in red, Forms Details, Company Logo section). The REMINDER side tab was removed; required-fields note is shown as hint text (“Fields marked in red are required”) with an info-style indicator.
-- Limit of 2 firms is enforced in UI and store with a clear warning banner.
+- Firm count limit and warning banner were removed; users can add any number of firms.
 
 ## Styling
 
