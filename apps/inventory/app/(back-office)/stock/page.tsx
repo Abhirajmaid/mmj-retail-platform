@@ -1,28 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
+import Link from "next/link";
 import { ArrowLeftRight, Minus, Plus } from "lucide-react";
 
 import { useStockMovements } from "@jewellery-retail/hooks";
-import {
-  Badge,
-  Button,
-  Card,
-  Input,
-  Modal,
-  PageHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@jewellery-retail/ui";
-import { dateFormat, statusColor } from "@jewellery-retail/utils";
+import { Button, PageHeader } from "@jewellery-retail/ui";
+import type { StockMovement } from "@jewellery-retail/types";
+import type { StockMovementView } from "@/src/types/stock";
+import { StockTable } from "@/src/components/stock/StockTable";
+
+function toView(m: StockMovement): StockMovementView {
+  return {
+    ...m,
+    status: m.status === "completed" || m.status === "pending" ? m.status : "pending",
+  };
+}
 
 export default function StockPage() {
   const { data } = useStockMovements();
-  const [action, setAction] = useState<"add" | "remove" | "transfer" | null>(null);
+
+  const movements: StockMovementView[] = useMemo(
+    () => data.map(toView),
+    [data]
+  );
 
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
@@ -31,15 +32,17 @@ export default function StockPage() {
         description="Review stock movements and trigger add, remove, or transfer workflows."
         actions={
           <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
-            <Button variant="outline" className="min-h-[44px] sm:min-h-9" onClick={() => setAction("add")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add stock
+            <Button variant="outline" className="min-h-[44px] sm:min-h-9" asChild>
+              <Link href="/stock/add">
+                <Plus className="mr-2 h-4 w-4" />
+                Add stock
+              </Link>
             </Button>
-            <Button variant="outline" className="min-h-[44px] sm:min-h-9" onClick={() => setAction("remove")}>
+            <Button variant="outline" className="min-h-[44px] sm:min-h-9">
               <Minus className="mr-2 h-4 w-4" />
               Remove stock
             </Button>
-            <Button className="min-h-[44px] sm:min-h-9" onClick={() => setAction("transfer")}>
+            <Button className="min-h-[44px] sm:min-h-9">
               <ArrowLeftRight className="mr-2 h-4 w-4" />
               Transfer stock
             </Button>
@@ -47,60 +50,10 @@ export default function StockPage() {
         }
       />
 
-      <div className="min-w-0 overflow-x-auto rounded-xl border border-zinc-100">
-        <Card className="min-w-[360px] p-4 sm:p-6">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeader>Product</TableHeader>
-              <TableHeader>Movement</TableHeader>
-              <TableHeader>Location</TableHeader>
-              <TableHeader>Status</TableHeader>
-              <TableHeader>Date</TableHeader>
-              <TableHeader className="text-right">Quantity</TableHeader>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((movement) => (
-              <TableRow key={movement.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium text-zinc-950">{movement.productName}</p>
-                    <p className="text-xs text-zinc-500">{movement.sku}</p>
-                  </div>
-                </TableCell>
-                <TableCell className="capitalize">{movement.type}</TableCell>
-                <TableCell>{movement.location}</TableCell>
-                <TableCell>
-                  <Badge variant={statusColor(movement.status)}>{movement.status}</Badge>
-                </TableCell>
-                <TableCell>{dateFormat(movement.updatedAt)}</TableCell>
-                <TableCell className="text-right font-medium text-zinc-950">{movement.quantity}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        </Card>
+      {/* Single area: click a stock row to open; details (product, location, etc.) show exactly below it */}
+      <div className="min-w-0">
+        <StockTable movements={movements} readOnly={false} />
       </div>
-
-      <Modal
-        open={Boolean(action)}
-        onClose={() => setAction(null)}
-        title={action ? `${action.charAt(0).toUpperCase()}${action.slice(1)} stock` : "Stock action"}
-      >
-        <div className="grid gap-4">
-          <Input label="SKU / Barcode" placeholder="Enter product code" />
-          <Input label="Quantity" type="number" placeholder="0" />
-          <Input label="Location" placeholder="Warehouse or store" />
-          {action === "transfer" ? <Input label="Transfer to" placeholder="Destination location" /> : null}
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setAction(null)}>
-              Cancel
-            </Button>
-            <Button onClick={() => setAction(null)}>Submit</Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }
