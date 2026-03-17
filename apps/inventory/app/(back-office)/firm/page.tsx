@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, LayoutGrid, List, Plus } from "lucide-react";
+import { LayoutGrid, List, Plus } from "lucide-react";
 import { useFirmStore } from "@/src/store/firm-store";
 import { Button, Loader, PageHeader } from "@jewellery-retail/ui";
-import { FirmCard } from "@/src/components/firm/FirmCard";
 import { FirmTable } from "@/src/components/firm/FirmTable";
 import { FirmKPIs } from "@/src/components/firm/FirmKPIs";
 import { Building2, CheckCircle, Clock, Users } from "lucide-react";
@@ -15,7 +14,7 @@ export default function FirmPage() {
   const router = useRouter();
   const { firms, deleteFirm, canAddFirm, fetchFirms, loading, error, clearError } =
     useFirmStore();
-  const [view, setView] = useState<"gallery" | "table">("gallery");
+  const [view, setView] = useState<"gallery" | "list">("gallery");
 
   useEffect(() => {
     fetchFirms();
@@ -72,13 +71,6 @@ export default function FirmPage() {
         </div>
       )}
 
-      {totalFirms >= 2 && (
-        <div className="flex items-center justify-center gap-2 rounded-lg bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-800">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          YOU CAN ADD ONLY 2 FIRMS!
-        </div>
-      )}
-
       <PageHeader
         title="Firm / Branch Management"
         description="Manage all your firms and branches from one place"
@@ -88,7 +80,7 @@ export default function FirmPage() {
               variant="outline"
               size="default"
               className="min-h-[44px] border-amber-200 text-amber-700 hover:bg-amber-50 sm:min-h-9"
-              onClick={() => setView(view === "gallery" ? "table" : "gallery")}
+              onClick={() => setView(view === "gallery" ? "list" : "gallery")}
             >
               {view === "gallery" ? (
                 <>
@@ -119,26 +111,15 @@ export default function FirmPage() {
       <FirmKPIs statusStats={statusStats} />
 
       {loading && firms.length === 0 ? (
-        <div className="flex min-h-[200px] items-center justify-center">
+        <div className="flex min-h-[200px] items-center justify-center rounded-lg bg-zinc-100/50">
           <Loader size="lg" label="Loading firms" className="h-48" />
-        </div>
-      ) : view === "gallery" ? (
-        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-          {firms.map((firm) => (
-            <FirmCard key={firm.id} firm={firm} onDelete={deleteFirm} />
-          ))}
-          {firms.length === 0 && (
-            <div className="col-span-full rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-12 text-center text-zinc-500">
-              No firms yet. Click &quot;Add Firm&quot; to create one.
-            </div>
-          )}
         </div>
       ) : (
         <FirmTable
           firms={firms}
           onDelete={deleteFirm}
-          activeView="list"
-          onViewChange={(v) => setView(v === "gallery" ? "gallery" : "table")}
+          activeView={view}
+          onViewChange={setView}
           onAddClick={() => router.push("/firm/add")}
         />
       )}

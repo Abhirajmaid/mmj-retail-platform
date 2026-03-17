@@ -9,7 +9,10 @@ import {
 } from "@/src/components/firm/firmTableColumns";
 import { FirmTabs, type ViewMode } from "@/src/components/firm/FirmTabs";
 import { FirmListView } from "@/src/components/firm/FirmListView";
+import { FirmCard } from "@/src/components/firm/FirmCard";
 import { ColumnVisibilityModal } from "@/src/components/firm/ColumnVisibilityModal";
+import { Building2, Plus } from "lucide-react";
+import { Button, EmptyState } from "@jewellery-retail/ui";
 import { FirmFilterModal, type FirmFilters } from "@/src/components/firm/FirmFilterModal";
 
 const ITEMS_PER_PAGE = 15;
@@ -198,20 +201,55 @@ export function FirmTable({
         {filtered.length !== 1 ? "s" : ""}
       </p>
 
-      <FirmListView
-        firms={paginatedFirms}
-        columns={visibleColumnsTable}
-        totalCount={filtered.length}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        itemsPerPage={ITEMS_PER_PAGE}
-        onPageChange={handlePageChange}
-        onRowClick={handleRowClick}
-        emptyMessage="No firms match the current filters."
-        searchQuery={search}
-        onClearSearch={() => setSearch("")}
-        onAddClick={onAddClick}
-      />
+      {activeView === "list" ? (
+        <FirmListView
+          firms={paginatedFirms}
+          columns={visibleColumnsTable}
+          totalCount={filtered.length}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={handlePageChange}
+          onRowClick={handleRowClick}
+          emptyMessage="No firms match the current filters."
+          searchQuery={search}
+          onClearSearch={() => setSearch("")}
+          onAddClick={onAddClick}
+        />
+      ) : filtered.length > 0 ? (
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((firm) => (
+            <FirmCard key={firm.id} firm={firm} onDelete={onDelete} />
+          ))}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-white/30 bg-gradient-to-br from-white/70 to-white/40 p-12 shadow-xl backdrop-blur-xl">
+          <EmptyState
+            icon={Building2}
+            title="No firms found"
+            description={
+              search.trim()
+                ? `No firms match your search "${search}"`
+                : "No firms match the current filters."
+            }
+            action={
+              search.trim() ? (
+                <Button variant="outline" onClick={() => setSearch("")} className="rounded-lg">
+                  Clear Search
+                </Button>
+              ) : onAddClick ? (
+                <Button
+                  onClick={onAddClick}
+                  className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:from-amber-600 hover:to-orange-600"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Firm
+                </Button>
+              ) : undefined
+            }
+          />
+        </div>
+      )}
 
       <FirmFilterModal
         isOpen={isFilterModalOpen}

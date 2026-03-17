@@ -4,10 +4,16 @@ import type { Firm } from "@/src/types/firm";
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL?.replace(/\/$/, "") ?? "";
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN ?? "";
 
-function mapStrapiToFirm(entry: { id: number; attributes?: Record<string, unknown> }): Firm {
-  const attrs = entry.attributes ?? {};
+function mapStrapiToFirm(entry: { id: number; attributes?: Record<string, unknown>; [key: string]: unknown }): Firm {
+  // Strapi v4: { id, attributes: { ... } }; Strapi v5 / flat: { id, firmId, shopName, ... }
+  const attrs =
+    entry.attributes && typeof entry.attributes === "object"
+      ? (entry.attributes as Record<string, unknown>)
+      : (entry as Record<string, unknown>);
+  // Strapi v5 uses documentId for single-doc routes; use it as id for consistency
+  const id = (attrs.documentId as string) ?? String(entry.id);
   return {
-    id: String(entry.id),
+    id,
     firmId: (attrs.firmId as string) ?? "",
     registrationNo: (attrs.registrationNo as string) ?? "",
     shopName: (attrs.shopName as string) ?? "",
