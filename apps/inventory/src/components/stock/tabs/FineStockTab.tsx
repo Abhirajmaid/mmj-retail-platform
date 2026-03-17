@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Camera, Upload, Barcode, Gem, FileText, Package, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import { useFineStockStore } from "@/src/store/stock-store";
+import { useFirmStore } from "@/src/store/firm-store";
 import type { FineStockEntry, MetalType, StoneDetail } from "@/src/types/stock";
 import { METAL_OPTIONS } from "@/src/types/stock";
-import { MONTHS } from "@/src/types/firm";
 import { StockStoneRow } from "../StockStoneRow";
+
+const BRAND_SELLER_OPTIONS = ["", "MMJ", "Partner", "Other"];
+const GENDER_OPTIONS = ["", "Male", "Female"];
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
@@ -22,13 +25,16 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
   const pendingEntries = useFineStockStore((s) => s.pendingEntries);
   const confirmEntry = useFineStockStore((s) => s.confirmEntry);
   const deletePending = useFineStockStore((s) => s.deletePending);
+  const { firms, fetchFirms } = useFirmStore();
+
+  useEffect(() => {
+    void fetchFirms();
+  }, [fetchFirms]);
 
   const [showStoneRow, setShowStoneRow] = useState(false);
   const [stones, setStones] = useState<StoneDetail[]>([]);
   const [form, setForm] = useState({
-    billDateDD: "",
-    billDateMM: "",
-    billDateYYYY: "",
+    billDate: new Date().toISOString().slice(0, 10),
     firm: "",
     metal: "Gold" as MetalType,
     metalRate: 0,
@@ -38,9 +44,6 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     genderBis: "",
     barcode: "",
     hallmarkUid: "",
-    mfgDateDD: "",
-    mfgDateMM: "",
-    mfgDateYYYY: "",
     category: "RING",
     name: "",
     qty: 1,
@@ -52,6 +55,7 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     purity: 92,
     wst: 0,
     fPurity: 96,
+    charges: 0,
     fnWt: 0,
     cw: 0,
     ffnWt: 0,
@@ -68,18 +72,12 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
   const update = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   const handleSubmit = () => {
-    const billDate = [form.billDateDD, form.billDateMM, form.billDateYYYY]
-      .filter(Boolean)
-      .join("-");
-    const mfgDate = [form.mfgDateDD, form.mfgDateMM, form.mfgDateYYYY]
-      .filter(Boolean)
-      .join("-");
     const valuation = form.valuation || form.ntWt * (form.metalRate || 0);
     const totLab = form.totLab || form.lbrChrg + form.mkgChrg;
     const finalAmt = form.finalAmt || valuation + totLab;
 
     addPending({
-      billDate: billDate || new Date().toISOString().slice(0, 10),
+      billDate: form.billDate || new Date().toISOString().slice(0, 10),
       firm: form.firm,
       metal: form.metal,
       metalRate: form.metalRate,
@@ -90,7 +88,7 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
       photos: [],
       barcode: form.barcode,
       hallmarkUid: form.hallmarkUid,
-      mfgDate: mfgDate || "",
+      mfgDate: "",
       category: form.category,
       name: form.name,
       qty: form.qty,
@@ -102,6 +100,7 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
       purity: form.purity,
       wst: form.wst,
       fPurity: form.fPurity,
+      charges: form.charges,
       fnWt: form.fnWt,
       cw: form.cw,
       ffnWt: form.ffnWt,
@@ -148,62 +147,37 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Bill Date</label>
-              <div className="flex gap-2">
-                <input
-                  placeholder="DD"
-                  className={inputClass}
-                  value={form.billDateDD}
-                  onChange={(e) => update({ billDateDD: e.target.value })}
-                  maxLength={2}
-                />
-                <select
-                  className={inputClass}
-                  value={form.billDateMM}
-                  onChange={(e) => update({ billDateMM: e.target.value })}
-                >
-                  <option value="">MON</option>
-                  {MONTHS.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-                <input
-                  placeholder="YYYY"
-                  className={inputClass}
-                  value={form.billDateYYYY}
-                  onChange={(e) => update({ billDateYYYY: e.target.value })}
-                  maxLength={4}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-900">Firm</label>
               <input
+                type="date"
                 className={inputClass}
-                value={form.firm}
-                onChange={(e) => update({ firm: e.target.value })}
-                placeholder="Firm"
+                value={form.billDate}
+                onChange={(e) => update({ billDate: e.target.value })}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-900">Metal / Rate</label>
-              <div className="flex gap-2">
-                <select
-                  className={inputClass}
-                  value={form.metal}
-                  onChange={(e) => update({ metal: e.target.value as MetalType })}
-                >
-                  {METAL_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  className={inputClass}
-                  value={form.metalRate || ""}
-                  onChange={(e) => update({ metalRate: Number(e.target.value) || 0 })}
-                  placeholder="Rate"
-                />
-              </div>
+              <label className="mb-1 block text-xs font-medium text-zinc-900">Firm</label>
+              <select
+                className={inputClass}
+                value={form.firm}
+                onChange={(e) => update({ firm: e.target.value })}
+              >
+                <option value="">— Select firm —</option>
+                {firms.map((f) => (
+                  <option key={f.id} value={f.id}>{f.shopName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-zinc-900">Metal</label>
+              <select
+                className={inputClass}
+                value={form.metal}
+                onChange={(e) => update({ metal: e.target.value as MetalType })}
+              >
+                {METAL_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Product Code</label>
@@ -216,12 +190,15 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Brand / Seller Name</label>
-              <input
+              <select
                 className={inputClass}
                 value={form.brandSellerName}
                 onChange={(e) => update({ brandSellerName: e.target.value })}
-                placeholder="Brand"
-              />
+              >
+                {BRAND_SELLER_OPTIONS.map((opt) => (
+                  <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Counter Name</label>
@@ -234,12 +211,15 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Gender BIS</label>
-              <input
+              <select
                 className={inputClass}
                 value={form.genderBis}
                 onChange={(e) => update({ genderBis: e.target.value })}
-                placeholder="Gender"
-              />
+              >
+                {GENDER_OPTIONS.map((opt) => (
+                  <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Img / Photos</label>
@@ -277,14 +257,6 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                 placeholder="Hallmark UID"
               />
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-900">Mfg Date</label>
-              <div className="flex gap-2">
-                <input placeholder="DD" className={inputClass} value={form.mfgDateDD} onChange={(e) => update({ mfgDateDD: e.target.value })} maxLength={2} />
-                <input placeholder="MON" className={inputClass} value={form.mfgDateMM} onChange={(e) => update({ mfgDateMM: e.target.value })} />
-                <input placeholder="YYYY" className={inputClass} value={form.mfgDateYYYY} onChange={(e) => update({ mfgDateYYYY: e.target.value })} maxLength={4} />
-              </div>
-            </div>
           </div>
         </CardBody>
       </Card>
@@ -301,95 +273,116 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
           </div>
         </CardHeader>
         <CardBody className="space-y-4 pt-0">
-          <div className="rounded-lg border border-zinc-100 bg-white p-4">
-            <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Category</label>
-                <input className={inputClass} value={form.category} onChange={(e) => update({ category: e.target.value })} placeholder="e.g. RING" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Name</label>
-                <input className={inputClass} value={form.name} onChange={(e) => update({ name: e.target.value })} placeholder="Name" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Qty</label>
-                <input type="number" className={inputClass} value={form.qty === 0 || form.qty === 1 ? "" : form.qty} onChange={(e) => update({ qty: Number(e.target.value) || 0 })} placeholder="1" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">GS WT</label>
-                <input type="number" className={inputClass} value={form.gsWt || ""} onChange={(e) => update({ gsWt: Number(e.target.value) || 0 })} placeholder="Gross weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Less WT</label>
-                <input type="number" className={inputClass} value={form.lessWt || ""} onChange={(e) => update({ lessWt: Number(e.target.value) || 0 })} placeholder="Less weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Pkt WT</label>
-                <input type="number" className={inputClass} value={form.pktWt || ""} onChange={(e) => update({ pktWt: Number(e.target.value) || 0 })} placeholder="Packet weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">NT WT</label>
-                <input type="number" className={inputClass} value={form.ntWt || ""} onChange={(e) => update({ ntWt: Number(e.target.value) || 0 })} placeholder="Net weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Tag WT</label>
-                <input type="number" className={inputClass} value={form.tagWt || ""} onChange={(e) => update({ tagWt: Number(e.target.value) || 0 })} placeholder="Tag weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Purity</label>
-                <input type="number" className={inputClass} value={form.purity === 0 || form.purity === 92 ? "" : form.purity} onChange={(e) => update({ purity: Number(e.target.value) || 0 })} placeholder="92" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">WST</label>
-                <input type="number" className={inputClass} value={form.wst || ""} onChange={(e) => update({ wst: Number(e.target.value) || 0 })} placeholder="WST" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">F. Purity</label>
-                <input type="number" className={inputClass} value={form.fPurity === 0 || form.fPurity === 96 ? "" : form.fPurity} onChange={(e) => update({ fPurity: Number(e.target.value) || 0 })} placeholder="96" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">FN WT</label>
-                <input type="number" className={inputClass} value={form.fnWt || ""} onChange={(e) => update({ fnWt: Number(e.target.value) || 0 })} placeholder="Fine weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">CW</label>
-                <input type="number" className={inputClass} value={form.cw || ""} onChange={(e) => update({ cw: Number(e.target.value) || 0 })} placeholder="0" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">FFN WT</label>
-                <input type="number" className={inputClass} value={form.ffnWt || ""} onChange={(e) => update({ ffnWt: Number(e.target.value) || 0 })} placeholder="FFN weight" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Lbr Chrg</label>
-                <input type="number" className={inputClass} value={form.lbrChrg || ""} onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })} placeholder="Labor charge" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Mkg Chrg</label>
-                <input type="number" className={inputClass} value={form.mkgChrg || ""} onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })} placeholder="Making charge" />
+          <div className="space-y-4">
+            {/* Basic Item Info */}
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Basic Item Info</h3>
+              <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Category</label>
+                  <input className={inputClass} value={form.category} onChange={(e) => update({ category: e.target.value })} placeholder="e.g. RING" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Name</label>
+                  <input className={inputClass} value={form.name} onChange={(e) => update({ name: e.target.value })} placeholder="Name" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Qty</label>
+                  <input type="number" className={inputClass} value={form.qty === 0 || form.qty === 1 ? "" : form.qty} onChange={(e) => update({ qty: Number(e.target.value) || 0 })} placeholder="1" />
+                </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap items-end gap-4 border-t border-zinc-100 pt-4">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Model No</label>
-                <input className={inputClass} value={form.modelNo} onChange={(e) => update({ modelNo: e.target.value })} placeholder="Model No" />
+
+            {/* Weight Details */}
+            <div className="rounded-lg border border-zinc-200 bg-amber-50/30 p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Weight Details</h3>
+              <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">GS WT</label>
+                  <input type="number" className={inputClass} value={form.gsWt || ""} onChange={(e) => update({ gsWt: Number(e.target.value) || 0 })} placeholder="Gross weight" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Less WT</label>
+                  <input type="number" className={inputClass} value={form.lessWt || ""} onChange={(e) => update({ lessWt: Number(e.target.value) || 0 })} placeholder="Less weight" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Pkt WT</label>
+                  <input type="number" className={inputClass} value={form.pktWt || ""} onChange={(e) => update({ pktWt: Number(e.target.value) || 0 })} placeholder="Packet weight" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Tag WT</label>
+                  <input type="number" className={inputClass} value={form.tagWt || ""} onChange={(e) => update({ tagWt: Number(e.target.value) || 0 })} placeholder="Tag weight" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">NT WT</label>
+                  <input type="number" className={inputClass} value={form.ntWt || ""} onChange={(e) => update({ ntWt: Number(e.target.value) || 0 })} placeholder="Net weight" />
+                </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
-                <input type="number" className={inputClass} value={form.othCh || ""} onChange={(e) => update({ othCh: Number(e.target.value) || 0 })} placeholder="Total hallmark charges" />
+            </div>
+
+            {/* WST & Fine Purity (includes Purity and Charges) */}
+            <div className="rounded-lg border border-zinc-200 bg-amber-50/30 p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">WST & Fine Purity</h3>
+              <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Purity</label>
+                  <input type="number" className={inputClass} value={form.purity === 0 || form.purity === 92 ? "" : form.purity} onChange={(e) => update({ purity: Number(e.target.value) || 0 })} placeholder="92" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">WST</label>
+                  <input type="number" className={inputClass} value={form.wst || ""} onChange={(e) => update({ wst: Number(e.target.value) || 0 })} placeholder="WST" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">F. Purity</label>
+                  <input type="number" className={inputClass} value={form.fPurity === 0 || form.fPurity === 96 ? "" : form.fPurity} onChange={(e) => update({ fPurity: Number(e.target.value) || 0 })} placeholder="96" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Charges</label>
+                  <input type="number" className={inputClass} value={form.charges || ""} onChange={(e) => update({ charges: Number(e.target.value) || 0 })} placeholder="Charges" />
+                </div>
               </div>
-              <div className="flex items-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="min-h-[44px] shrink-0 border-amber-400 text-amber-700 hover:bg-amber-50">
-                  DETAILS
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setShowStoneRow(!showStoneRow)}
-                  className="flex h-[44px] w-10 shrink-0 items-center justify-center rounded-lg border-2 border-amber-500 bg-amber-400 text-navy-800 hover:bg-amber-500"
-                  title="Stone"
-                >
-                  <Gem className="h-4 w-4" />
-                </button>
+            </div>
+
+            {/* Final Weights + Charge Details */}
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-zinc-200 bg-emerald-50/40 p-4">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Final Weights</h3>
+                <div className="grid min-w-0 grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">FFN WT</label>
+                    <input type="number" className={inputClass} value={form.ffnWt || ""} onChange={(e) => update({ ffnWt: Number(e.target.value) || 0 })} placeholder="FFN weight" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">FN WT</label>
+                    <input type="number" className={inputClass} value={form.fnWt || ""} onChange={(e) => update({ fnWt: Number(e.target.value) || 0 })} placeholder="Fine weight" />
+                  </div>
+                </div>
               </div>
+              <div className="rounded-lg border border-zinc-200 bg-sky-50/50 p-4">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Customer Charges details</h3>
+                <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">Cust  WST</label>
+                    <input type="number" className={inputClass} value={form.cw || ""} onChange={(e) => update({ cw: Number(e.target.value) || 0 })} placeholder="0" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">Lbr Chrg</label>
+                    <input type="number" className={inputClass} value={form.lbrChrg || ""} onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })} placeholder="Labor charge" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">Mkg Chrg</label>
+                    <input type="number" className={inputClass} value={form.mkgChrg || ""} onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })} placeholder="Making charge" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
+                    <input type="number" className={inputClass} value={form.othCh || ""} onChange={(e) => update({ othCh: Number(e.target.value) || 0 })} placeholder="Total hallmark charges" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-zinc-100 bg-white p-4">
+            <div className="flex flex-wrap items-end gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-zinc-900">Valuation</label>
                 <input
@@ -401,32 +394,14 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                   className={inputClass}
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Tot Lab</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={form.totLab === 0 ? "" : form.totLab}
-                  onChange={(e) => update({ totLab: Number(e.target.value) || 0 })}
-                  placeholder={((form.lbrChrg || 0) + (form.mkgChrg || 0)).toFixed(2)}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">Final Amt</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={form.finalAmt === 0 ? "" : form.finalAmt}
-                  onChange={(e) => update({ finalAmt: Number(e.target.value) || 0 })}
-                  placeholder={((form.valuation || form.ntWt * (form.metalRate || 0)) + (form.totLab || (form.lbrChrg || 0) + (form.mkgChrg || 0))).toFixed(2)}
-                  className={inputClass}
-                />
-              </div>
-              <div className="flex items-end pb-2">
-                <label className="mr-2 block text-xs font-medium text-zinc-900">Include</label>
-                <input type="checkbox" className="h-4 w-4" />
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowStoneRow(!showStoneRow)}
+                className="flex h-[44px] w-10 shrink-0 items-center justify-center rounded-lg border-2 border-amber-500 bg-amber-400 text-navy-800 hover:bg-amber-500"
+                title="Stone"
+              >
+                <Gem className="h-4 w-4" />
+              </button>
             </div>
             {showStoneRow && (
               <div className="border-t border-zinc-100">

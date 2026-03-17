@@ -50,6 +50,7 @@ export interface FineStockEntry {
   purity: number;
   wst: number;
   fPurity: number;
+  charges: number;
   fnWt: number;
   cw: number;
   ffnWt: number;
