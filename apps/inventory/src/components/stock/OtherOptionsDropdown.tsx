@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
-const OPTIONS: { value: string; label: string }[] = [
+const OPTIONS: { value: string; label: string; href?: string }[] = [
   { value: "STOCK SETTING", label: "Stock setting" },
   { value: "STOCK MASTER", label: "Stock master" },
-  { value: "STOCK TRANSFER", label: "Stock transfer" },
+  { value: "STOCK TRANSFER", label: "Stock transfer", href: "/stock/transfer" },
   { value: "DISCOUNT OPTION", label: "Discount option" },
   { value: "SETUP OPTION", label: "Setup option" },
   { value: "MULTIPLE STOCK DELETE", label: "Multiple stock delete" },
@@ -75,19 +76,30 @@ export function OtherOptionsDropdown({
             className="fixed z-[100] mt-1 min-w-[200px] overflow-hidden rounded-xl border border-zinc-100 bg-white py-1 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
             style={{ top: position.top, left: position.left }}
           >
-            {OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => {
-                  onSelect?.(value);
-                  setOpen(false);
-                }}
-                className="w-full px-4 py-2.5 text-left text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 hover:text-amber-800"
-              >
-                {label}
-              </button>
-            ))}
+            {OPTIONS.map(({ value, label, href }) =>
+              href ? (
+                <Link
+                  key={value}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className="block w-full px-4 py-2.5 text-left text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 hover:text-amber-800"
+                >
+                  {label}
+                </Link>
+              ) : (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    onSelect?.(value);
+                    setOpen(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 hover:text-amber-800"
+                >
+                  {label}
+                </button>
+              )
+            )}
           </div>,
           document.body
         )}

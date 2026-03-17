@@ -9,6 +9,7 @@ import { useFirmStore } from "@/src/store/firm-store";
 import type { FineStockEntry, MetalType, StoneDetail } from "@/src/types/stock";
 import { METAL_OPTIONS } from "@/src/types/stock";
 import { StockStoneRow } from "../StockStoneRow";
+import { GoldStockListTable } from "../transfer/GoldStockListTable";
 
 const BRAND_SELLER_OPTIONS = ["", "MMJ", "Partner", "Other"];
 const GENDER_OPTIONS = ["", "Male", "Female"];
@@ -31,6 +32,7 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     void fetchFirms();
   }, [fetchFirms]);
 
+  const [showGoldList, setShowGoldList] = useState(false);
   const [showStoneRow, setShowStoneRow] = useState(false);
   const [stones, setStones] = useState<StoneDetail[]>([]);
   const [form, setForm] = useState({
@@ -118,8 +120,25 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     setShowStoneRow(false);
   };
 
+  if (showGoldList) {
+    return (
+      <div className="relative flex min-w-0 flex-col gap-6">
+        <GoldStockListTable onBack={() => setShowGoldList(false)} showBackButton />
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex min-w-0 flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-end">
+        <button
+          type="button"
+          onClick={() => setShowGoldList(true)}
+          className="min-h-[44px] rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-600"
+        >
+          ALL GOLD STOCK LIST
+        </button>
+      </div>
       <p className="flex items-center gap-2 text-xs text-zinc-500">
         <span className="inline-block h-4 w-4 rounded-full bg-amber-100 text-center text-[10px] leading-4 text-amber-600" aria-hidden>i</span>
         <span>Fields marked in <span className="font-medium text-red-500">red</span> are required.</span>

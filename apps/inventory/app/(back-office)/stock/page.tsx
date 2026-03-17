@@ -76,19 +76,32 @@ export default function StockPage() {
         description="Review stock movements and trigger add, remove, or transfer workflows."
         actions={
           <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
-            <Button variant="outline" className="min-h-[44px] sm:min-h-9" asChild>
+            <Button
+              variant="outline"
+              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
+              asChild
+            >
               <Link href="/stock/add">
                 <Plus className="mr-2 h-4 w-4" />
                 Add stock
               </Link>
             </Button>
-            <Button variant="outline" className="min-h-[44px] sm:min-h-9">
+            <Button
+              variant="outline"
+              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
+            >
               <Minus className="mr-2 h-4 w-4" />
               Remove stock
             </Button>
-            <Button className="min-h-[44px] sm:min-h-9">
-              <ArrowLeftRight className="mr-2 h-4 w-4" />
-              Transfer stock
+            <Button
+              variant="outline"
+              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
+              asChild
+            >
+              <Link href="/stock/transfer">
+                <ArrowLeftRight className="mr-2 h-4 w-4" />
+                Transfer stock
+              </Link>
             </Button>
           </div>
         }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Badge,
   Table,
@@ -43,6 +44,7 @@ export function StockTable({
   highlightedProductKey,
   readOnly = false,
 }: StockTableProps) {
+  const router = useRouter();
   const [movementFilter, setMovementFilter] = useState<MovementFilter>("All");
   const [productNameSearch, setProductNameSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -173,6 +175,7 @@ export function StockTable({
             ) : (
               paginatedItems.map((m) => {
                 const isHighlighted = highlightedProductKey === getProductKey(m);
+                const isTransfer = m.type === "transfer";
                 return (
                   <TableRow
                     key={m.id}
@@ -181,6 +184,9 @@ export function StockTable({
                         ? "border-b border-zinc-100 bg-amber-50"
                         : "border-b border-zinc-100 bg-white"
                     }
+                    onClick={isTransfer ? () => router.push("/stock/transfer/list") : undefined}
+                    role={isTransfer ? "button" : undefined}
+                    style={isTransfer ? { cursor: "pointer" } : undefined}
                   >
                     <TableCell className="py-2 pl-4 min-w-0">
                       <div className="min-w-0">
@@ -192,8 +198,12 @@ export function StockTable({
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="py-2 text-left text-sm capitalize text-zinc-700">
-                      {m.type}
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">
+                      {isTransfer ? (
+                        <Badge variant="info">Transfer</Badge>
+                      ) : (
+                        <span className="capitalize">{m.type}</span>
+                      )}
                     </TableCell>
                     <TableCell className="py-2 text-left text-sm text-zinc-700 truncate" title={m.location}>
                       {m.location}
