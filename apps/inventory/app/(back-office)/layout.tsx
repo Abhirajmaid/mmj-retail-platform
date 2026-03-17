@@ -2,12 +2,13 @@
 
 import type { ReactNode } from "react";
 
-import { DashboardLayout } from "@jewellery-retail/ui";
+import { DashboardLayout, ToastProvider } from "@jewellery-retail/ui";
 
 import { inventoryNavigation } from "@/src/config/navigation";
 
 export default function InventoryLayout({ children }: { children: ReactNode }) {
   return (
+    <ToastProvider>
     <DashboardLayout
       brand={{
         title: "Inventory Core",
@@ -19,5 +20,6 @@ export default function InventoryLayout({ children }: { children: ReactNode }) {
     >
       {children}
     </DashboardLayout>
+    </ToastProvider>
   );
 }

@@ -85,6 +85,13 @@ export interface Subscription {
   mrr: number;
 }
 
+export type SupplierType =
+  | "gold"
+  | "diamond"
+  | "silver"
+  | "stone"
+  | "other";
+
 export interface Supplier {
   id: string;
   name: string;
@@ -92,9 +99,33 @@ export interface Supplier {
   email: string;
   phone: string;
   city: string;
-  status: "active" | "pending";
+  status: "active" | "pending" | "inactive";
+  supplierType?: SupplierType;
   onTimeRate: number;
   openOrders: number;
+  // Supplier Information
+  businessRegistrationNumber?: string;
+  gstNumber?: string;
+  panNumber?: string;
+  // Contact & Location
+  alternatePhone?: string;
+  website?: string;
+  state?: string;
+  pincode?: string;
+  fullAddress?: string;
+  // Bank & Payment Details
+  bankName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  paymentTerms?: string;
+  creditLimit?: number;
+  currency?: string;
+  // Performance & Catalog
+  metalTypes?: string[];
+  itemCategories?: string[];
+  leadTimeDays?: number;
+  minimumOrderValue?: number;
+  notes?: string;
 }
 
 export interface StockMovement {

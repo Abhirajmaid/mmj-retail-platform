@@ -64,6 +64,7 @@ export {
 } from "./components/table";
 export { EmptyState } from "./components/empty-state";
 export { Loader, PageLoader } from "./feedback/loader";
+export { ToastProvider, useToast } from "./feedback/toast";
 export { SingleLink } from "./navigation/single-link";
 export { PaginationControls } from "./navigation/pagination-controls";
 export { Navlinks } from "./navigation/navlinks";
