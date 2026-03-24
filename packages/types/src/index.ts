@@ -71,6 +71,20 @@ export interface Customer {
   status: "active" | "inactive";
   lastPurchaseAt: string;
   purchaseHistory: PurchaseHistoryItem[];
+  /** Optional extended fields for customer creation form and profile */
+  title?: "Mr" | "Mrs";
+  firstName?: string;
+  lastName?: string;
+  gender?: "Male" | "Female";
+  dateOfBirth?: string;
+  address?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+  gstNumber?: string;
+  panNumber?: string;
+  aadhaarNumber?: string;
+  userType?: string;
 }
 
 export interface Subscription {
