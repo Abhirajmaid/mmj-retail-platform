@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
+import { useMemo, useState, useRef, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Button,
+  Card,
+  PageHeader,
   Table,
   TableBody,
   TableCell,
@@ -11,7 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@jewellery-retail/ui";
-import { LayoutGrid, RotateCcw, Plus, ChevronDown } from "lucide-react";
+import {
+  CheckCircle2,
+  ClipboardList,
+  ChevronDown,
+  Layers,
+  Package,
+  Plus,
+  RotateCcw,
+} from "lucide-react";
 import { useStockTallyStore } from "@/src/store/stockTallyStore";
 import { ReminderTab } from "@/src/components/stock-tally/ReminderTab";
 import { STOCK_TALLY_CATEGORIES } from "@/src/types/stockTally";
@@ -91,6 +102,58 @@ function CategoryDropdown({
         </div>
       )}
     </div>
+  );
+}
+
+/** Matches FirmKPIs / StockKPIs frosted card + icon treatment */
+const tallyShellClass =
+  "flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-white/30 bg-gradient-to-br from-white/70 to-white/40 shadow-xl backdrop-blur-xl";
+
+function TallyColumnShell({
+  label,
+  totalLine,
+  weightLine,
+  footerLabel,
+  dotClass,
+  icon: Icon,
+  iconWrapClass,
+  iconClass,
+  children,
+}: {
+  label: string;
+  totalLine: string;
+  weightLine?: string | null;
+  footerLabel: string;
+  dotClass: string;
+  icon: LucideIcon;
+  iconWrapClass: string;
+  iconClass: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card padding="none" className={tallyShellClass}>
+      <div className="border-b border-zinc-100/80 p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+            <p className="text-3xl font-black tracking-tight text-zinc-900">{totalLine}</p>
+            {weightLine != null && weightLine !== "" && (
+              <p className="text-sm text-zinc-600">{weightLine}</p>
+            )}
+            <div className="flex items-center gap-2 pt-1">
+              <span className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{footerLabel}</p>
+            </div>
+          </div>
+          <div
+            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border shadow-md backdrop-blur-sm ${iconWrapClass}`}
+          >
+            <Icon className={`h-7 w-7 ${iconClass}`} />
+          </div>
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto bg-zinc-50/50 p-3 sm:p-4">{children}</div>
+    </Card>
   );
 }
 
@@ -224,27 +287,20 @@ export default function StockTallyRfidBarcodePage() {
   const isTables = mode === "tables";
 
   return (
-    <div className="relative min-w-0 bg-transparent pl-10">
+    <div className="relative min-w-0 max-w-full space-y-4 sm:space-y-6">
       <ReminderTab />
 
-      <div className="min-w-0 space-y-4">
-        {/* Title bar + mode tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3 border-l-4 border-amber-500 pl-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-              <LayoutGrid className="h-5 w-5" />
-            </span>
-            <h1 className="text-xl font-bold uppercase tracking-wide text-zinc-900">
-              RFID / BAR-CODE STOCK TALLY PANEL
-            </h1>
-          </div>
-          <div className="flex flex-nowrap gap-2 overflow-x-auto">
+      <PageHeader
+        title="RFID / Barcode stock tally"
+        description="Reconcile physical stock with RFID, multi-barcode, images, or tables — same patterns as Stock and Firm."
+        actions={
+          <div className="flex max-w-full flex-nowrap gap-2 overflow-x-auto pb-1">
             {MODES.map((m) => (
               <button
                 key={m.key}
                 type="button"
                 onClick={() => setMode(m.key)}
-                className={`min-h-[44px] whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold uppercase transition sm:min-h-9 ${
+                className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold uppercase transition sm:min-h-9 ${
                   mode === m.key
                     ? "bg-amber-500 text-white shadow-sm hover:bg-amber-600"
                     : "border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50"
@@ -254,10 +310,15 @@ export default function StockTallyRfidBarcodePage() {
               </button>
             ))}
           </div>
-        </div>
+        }
+      />
 
-        {/* Top control section */}
-        <div className="rounded-lg border border-slate-200/80 bg-white/95 p-4 shadow-sm backdrop-blur-sm">
+      <div className="min-w-0 space-y-4 sm:space-y-6">
+        {/* Top control section — frosted panel like StockKPIs / FirmKPIs */}
+        <Card
+          padding="none"
+          className="rounded-2xl border border-white/30 bg-gradient-to-br from-white/70 to-white/40 p-4 shadow-xl backdrop-blur-xl sm:p-5"
+        >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             {/* Left: toggle, open/close, counter, location, category */}
             <div className="flex flex-1 flex-col gap-3">
@@ -306,7 +367,7 @@ export default function StockTallyRfidBarcodePage() {
                     type="text"
                     value={counterName}
                     onChange={(e) => setCounterName(e.target.value)}
-                    className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+                    className="w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                     placeholder="Counter Name"
                   />
                 </div>
@@ -318,7 +379,7 @@ export default function StockTallyRfidBarcodePage() {
                     type="text"
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
-                    className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+                    className="w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                     placeholder="Location Name"
                   />
                 </div>
@@ -356,7 +417,7 @@ export default function StockTallyRfidBarcodePage() {
                         type="text"
                         value={filterItemName}
                         onChange={(e) => setFilterItemName(e.target.value)}
-                        className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+                        className="w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                       />
                     </div>
                     <div>
@@ -367,7 +428,7 @@ export default function StockTallyRfidBarcodePage() {
                         type="text"
                         value={filterItemId}
                         onChange={(e) => setFilterItemId(e.target.value)}
-                        className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+                        className="w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                       />
                     </div>
                   </div>
@@ -388,7 +449,7 @@ export default function StockTallyRfidBarcodePage() {
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
                     rows={6}
-                    className="w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
+                    className="w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                     placeholder={
                       mode === "rfid"
                         ? "One tag per line"
@@ -408,7 +469,7 @@ export default function StockTallyRfidBarcodePage() {
                       onChange={(e) =>
                         setItemsPerPage(Number(e.target.value) || 30)
                       }
-                      className="w-16 rounded border border-slate-200 px-2 py-1.5 text-sm"
+                      className="w-16 rounded-lg border border-zinc-200 px-2 py-1.5 text-sm shadow-sm"
                     />
                     <button
                       type="button"
@@ -445,55 +506,42 @@ export default function StockTallyRfidBarcodePage() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Bottom split panel */}
-        <div className="grid min-h-[320px] grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid min-h-[320px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
           {/* AVAILABLE / NON TALLY */}
-          <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div
-              className={`flex flex-col gap-1 px-4 py-3 ${
-                isRfidOrBarcode
-                  ? "bg-sky-50"
-                  : isImages || isTables
-                    ? "bg-amber-50"
-                    : "bg-sky-50"
-              }`}
-            >
-              <div
-                className={`text-sm font-bold uppercase ${
-                  isRfidOrBarcode ? "text-sky-800" : "text-amber-800"
-                }`}
-              >
-                {isRfidOrBarcode
-                  ? "AVAILABLE"
-                  : `NON TALLY STOCK (${filteredForImagesTables.length})`}
-              </div>
-              <div className="text-2xl font-bold text-amber-600">
-                Total: {isRfidOrBarcode ? availableTotal : filteredForImagesTables.length}
-              </div>
-              {isRfidOrBarcode && (
-                <div className="text-sm text-zinc-600">
-                  Wt: {availableWeight.toFixed(2)} / {totalWeight.toFixed(2)}
-                </div>
-              )}
-              <div
-                className={`text-xs font-semibold uppercase ${
-                  isRfidOrBarcode ? "text-sky-700" : "text-amber-700"
-                }`}
-              >
-                {isRfidOrBarcode ? "AVAILABLE STOCK" : "NON TALLY STOCK"}
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2">
+          <TallyColumnShell
+            label={
+              isRfidOrBarcode
+                ? "Available"
+                : `Non tally stock (${filteredForImagesTables.length})`
+            }
+            totalLine={`Total: ${isRfidOrBarcode ? availableTotal : filteredForImagesTables.length}`}
+            weightLine={
+              isRfidOrBarcode
+                ? `Wt: ${availableWeight.toFixed(2)} / ${totalWeight.toFixed(2)}`
+                : null
+            }
+            footerLabel={isRfidOrBarcode ? "Available stock" : "Awaiting tally"}
+            dotClass={isRfidOrBarcode ? "bg-blue-500" : "bg-amber-500"}
+            icon={isRfidOrBarcode ? Package : Layers}
+            iconWrapClass={
+              isRfidOrBarcode
+                ? "border-blue-200 bg-blue-50"
+                : "border-amber-200 bg-amber-50"
+            }
+            iconClass={isRfidOrBarcode ? "text-blue-600" : "text-amber-600"}
+          >
+            <div className="space-y-3">
               {isImages && (
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {filteredForImagesTables.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => markAsScanned(item.id)}
-                      className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-left shadow-sm hover:border-amber-400 hover:bg-amber-100/80"
+                      className="flex gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50/80"
                     >
                       <div className="h-16 w-16 shrink-0 rounded bg-slate-200 flex items-center justify-center text-slate-400 text-xs">
                         {item.imageUrl ? (
@@ -526,58 +574,68 @@ export default function StockTallyRfidBarcodePage() {
                 />
               )}
               {isRfidOrBarcode && (
-                <div className="space-y-2">
-                  {filteredAvailableEffective.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between rounded-lg border border-slate-100 bg-white px-3 py-2 shadow-sm"
-                    >
-                      <div>
-                        <p className="font-bold text-zinc-900">{item.productId}</p>
-                        <p className="text-sm text-zinc-700">{item.name}</p>
-                        <p className="text-xs text-zinc-600">
-                          Wt: {item.grossWeight}g
-                        </p>
-                      </div>
-                      <span className="text-xs text-zinc-500">
-                        {item.barcodeOrTag ?? "—"}
-                      </span>
+                <>
+                  {filteredAvailableEffective.length === 0 ? (
+                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/80 px-4 py-8 text-center">
+                      <p className="text-sm font-medium text-zinc-600">No available lines</p>
+                      <p className="mt-1 max-w-xs text-xs text-zinc-500">
+                        Adjust category filter or enter tags on the right to move items to scanned.
+                      </p>
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredAvailableEffective.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-start justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-zinc-900">{item.productId}</p>
+                            <p className="text-sm text-zinc-700">{item.name}</p>
+                            <p className="mt-0.5 text-xs text-zinc-500">
+                              Wt: {item.grossWeight}g
+                            </p>
+                          </div>
+                          <span className="shrink-0 font-mono text-xs text-zinc-500">
+                            {item.barcodeOrTag ?? "—"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          </div>
+          </TallyColumnShell>
 
           {/* SCANNED / TALLY */}
-          <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-1 bg-emerald-50 px-4 py-3">
-              <div className="text-sm font-bold uppercase text-emerald-800">
-                {isRfidOrBarcode
-                  ? "SCANNED"
-                  : `TALLY STOCK (${talliedForImagesTables.length})`}
-              </div>
-              <div className="text-2xl font-bold text-amber-600">
-                Total: {isRfidOrBarcode ? scannedTotal : talliedForImagesTables.length}
-              </div>
-              {isRfidOrBarcode && (
-                <div className="text-sm text-zinc-600">
-                  Wt: {scannedWeight.toFixed(2)} / {totalWeight.toFixed(2)}
-                </div>
-              )}
-              <div className="text-xs font-semibold uppercase text-emerald-700">
-                {isRfidOrBarcode ? "SCANNED STOCK" : "TALLY STOCK"}
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2">
+          <TallyColumnShell
+            label={
+              isRfidOrBarcode
+                ? "Scanned"
+                : `Tally stock (${talliedForImagesTables.length})`
+            }
+            totalLine={`Total: ${isRfidOrBarcode ? scannedTotal : talliedForImagesTables.length}`}
+            weightLine={
+              isRfidOrBarcode
+                ? `Wt: ${scannedWeight.toFixed(2)} / ${totalWeight.toFixed(2)}`
+                : null
+            }
+            footerLabel={isRfidOrBarcode ? "Scanned stock" : "Counted"}
+            dotClass="bg-emerald-500"
+            icon={isRfidOrBarcode ? CheckCircle2 : ClipboardList}
+            iconWrapClass="border-emerald-200 bg-emerald-50"
+            iconClass="text-emerald-600"
+          >
+            <div className="space-y-3">
               {isImages && (
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {talliedForImagesTables.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => unmarkScanned(item.id)}
-                      className="flex gap-3 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm hover:bg-slate-50"
+                      className="flex gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50/80"
                     >
                       <div className="h-16 w-16 shrink-0 rounded bg-slate-200 flex items-center justify-center text-slate-400 text-xs">
                         {item.imageUrl ? (
@@ -610,28 +668,39 @@ export default function StockTallyRfidBarcodePage() {
                 />
               )}
               {isRfidOrBarcode && (
-                <div className="space-y-2">
-                  {scannedItemsEffective.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between rounded-lg border border-slate-100 bg-white px-3 py-2 shadow-sm"
-                    >
-                      <div>
-                        <p className="font-bold text-zinc-900">{item.productId}</p>
-                        <p className="text-sm text-zinc-700">{item.name}</p>
-                        <p className="text-xs text-zinc-600">
-                          Wt: {item.grossWeight}g
-                        </p>
-                      </div>
-                      <span className="text-xs text-zinc-500">
-                        ({item.barcodeOrTag ?? "—"})
-                      </span>
+                <>
+                  {scannedItemsEffective.length === 0 ? (
+                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/80 px-4 py-8 text-center">
+                      <p className="text-sm font-medium text-zinc-600">Nothing scanned yet</p>
+                      <p className="mt-1 max-w-xs text-xs text-zinc-500">
+                        Paste or type RFID / barcode tags in the panel above to match lines here.
+                      </p>
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {scannedItemsEffective.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-start justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm ring-1 ring-emerald-100/60"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-zinc-900">{item.productId}</p>
+                            <p className="text-sm text-zinc-700">{item.name}</p>
+                            <p className="mt-0.5 text-xs text-zinc-500">
+                              Wt: {item.grossWeight}g
+                            </p>
+                          </div>
+                          <span className="shrink-0 font-mono text-xs text-zinc-500">
+                            {item.barcodeOrTag ?? "—"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          </div>
+          </TallyColumnShell>
         </div>
       </div>
     </div>

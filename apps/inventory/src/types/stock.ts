@@ -53,12 +53,20 @@ export interface FineStockEntry {
   charges: number;
   fnWt: number;
   cw: number;
+  /** How CW charge is applied: per gram or percentage */
+  cwChrgType?: "per_gm" | "percentage";
   ffnWt: number;
   lbrChrg: number;
+  /** How labor charge is applied: per gram or percentage */
+  lbrChrgType?: "per_gm" | "percentage";
   mkgChrg: number;
+  /** How making charge is applied: per gram or percentage */
+  mkgChrgType?: "per_gm" | "percentage";
   totHallmarkChrgs: number;
   modelNo: string;
   othCh: number;
+  /** How hallmark charge is applied: per gram or percentage */
+  othChChrgType?: "per_gm" | "percentage";
   valuation: number;
   totLab: number;
   finalAmt: number;

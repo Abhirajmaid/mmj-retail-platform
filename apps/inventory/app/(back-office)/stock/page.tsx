@@ -77,8 +77,7 @@ export default function StockPage() {
         actions={
           <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
             <Button
-              variant="outline"
-              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
+              variant="primary"
               asChild
             >
               <Link href="/stock/add">
@@ -88,14 +87,13 @@ export default function StockPage() {
             </Button>
             <Button
               variant="outline"
-              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
+              
             >
               <Minus className="mr-2 h-4 w-4" />
               Remove stock
             </Button>
             <Button
               variant="outline"
-              className="min-h-[44px] rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white text-zinc-900 hover:bg-amber-50 sm:min-h-9"
               asChild
             >
               <Link href="/stock/transfer">

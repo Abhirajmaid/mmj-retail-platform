@@ -9,10 +9,15 @@ import { useFirmStore } from "@/src/store/firm-store";
 import type { FineStockEntry, MetalType, StoneDetail } from "@/src/types/stock";
 import { METAL_OPTIONS } from "@/src/types/stock";
 import { StockStoneRow } from "../StockStoneRow";
-import { GoldStockListTable } from "../transfer/GoldStockListTable";
 
 const BRAND_SELLER_OPTIONS = ["", "MMJ", "Partner", "Other"];
 const GENDER_OPTIONS = ["", "Male", "Female"];
+
+export type ChargeBasis = "per_gm" | "percentage";
+const CHARGE_BASIS_OPTIONS: { value: ChargeBasis; label: string }[] = [
+  { value: "per_gm", label: "gm" },
+  { value: "percentage", label: "%" },
+];
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
@@ -32,7 +37,6 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     void fetchFirms();
   }, [fetchFirms]);
 
-  const [showGoldList, setShowGoldList] = useState(false);
   const [showStoneRow, setShowStoneRow] = useState(false);
   const [stones, setStones] = useState<StoneDetail[]>([]);
   const [form, setForm] = useState({
@@ -60,10 +64,14 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     charges: 0,
     fnWt: 0,
     cw: 0,
+    cwChrgType: "per_gm" as ChargeBasis,
     ffnWt: 0,
     lbrChrg: 0,
+    lbrChrgType: "per_gm" as ChargeBasis,
     mkgChrg: 0,
+    mkgChrgType: "per_gm" as ChargeBasis,
     totHallmarkChrgs: 0,
+    othChChrgType: "per_gm" as ChargeBasis,
     modelNo: "",
     othCh: 0,
     valuation: 0,
@@ -73,8 +81,16 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
 
   const update = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
+  const derivedNtWt = Math.max(
+    0,
+    (form.gsWt || 0) - (form.lessWt || 0) - (form.pktWt || 0) - (form.tagWt || 0)
+  );
+  const derivedFPurity = Math.max(0, (form.purity || 0) + (form.wst || 0));
+  const derivedFnWt = (derivedNtWt * (form.purity || 0)) / 100;
+  const derivedFFnWt = (derivedNtWt * derivedFPurity) / 100;
+
   const handleSubmit = () => {
-    const valuation = form.valuation || form.ntWt * (form.metalRate || 0);
+    const valuation = form.valuation || derivedNtWt * (form.metalRate || 0);
     const totLab = form.totLab || form.lbrChrg + form.mkgChrg;
     const finalAmt = form.finalAmt || valuation + totLab;
 
@@ -97,18 +113,22 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
       gsWt: form.gsWt,
       lessWt: form.lessWt,
       pktWt: form.pktWt,
-      ntWt: form.ntWt,
+      ntWt: derivedNtWt,
       tagWt: form.tagWt,
       purity: form.purity,
       wst: form.wst,
-      fPurity: form.fPurity,
+      fPurity: derivedFPurity,
       charges: form.charges,
-      fnWt: form.fnWt,
+      fnWt: derivedFnWt,
       cw: form.cw,
-      ffnWt: form.ffnWt,
+      cwChrgType: form.cwChrgType,
+      ffnWt: derivedFFnWt,
       lbrChrg: form.lbrChrg,
+      lbrChrgType: form.lbrChrgType,
       mkgChrg: form.mkgChrg,
+      mkgChrgType: form.mkgChrgType,
       totHallmarkChrgs: form.totHallmarkChrgs,
+      othChChrgType: form.othChChrgType,
       modelNo: form.modelNo,
       othCh: form.othCh,
       valuation,
@@ -120,25 +140,8 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
     setShowStoneRow(false);
   };
 
-  if (showGoldList) {
-    return (
-      <div className="relative flex min-w-0 flex-col gap-6">
-        <GoldStockListTable onBack={() => setShowGoldList(false)} showBackButton />
-      </div>
-    );
-  }
-
   return (
     <div className="relative flex min-w-0 flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-end">
-        <button
-          type="button"
-          onClick={() => setShowGoldList(true)}
-          className="min-h-[44px] rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-zinc-900 hover:bg-amber-600"
-        >
-          ALL GOLD STOCK LIST
-        </button>
-      </div>
       <p className="flex items-center gap-2 text-xs text-zinc-500">
         <span className="inline-block h-4 w-4 rounded-full bg-amber-100 text-center text-[10px] leading-4 text-amber-600" aria-hidden>i</span>
         <span>Fields marked in <span className="font-medium text-red-500">red</span> are required.</span>
@@ -334,7 +337,14 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-900">NT WT</label>
-                  <input type="number" className={inputClass} value={form.ntWt || ""} onChange={(e) => update({ ntWt: Number(e.target.value) || 0 })} placeholder="Net weight" />
+                  <input
+                    type="number"
+                    className={`${inputClass} bg-gray-50`}
+                    value={derivedNtWt === 0 ? "" : derivedNtWt}
+                    readOnly
+                    placeholder="Auto"
+                    title="NT WT = GS WT - Less WT - Pkt WT - Tag WT"
+                  />
                 </div>
               </div>
             </div>
@@ -353,7 +363,14 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-900">F. Purity</label>
-                  <input type="number" className={inputClass} value={form.fPurity === 0 || form.fPurity === 96 ? "" : form.fPurity} onChange={(e) => update({ fPurity: Number(e.target.value) || 0 })} placeholder="96" />
+                  <input
+                    type="number"
+                    className={`${inputClass} bg-gray-50`}
+                    value={derivedFPurity === 0 ? "" : derivedFPurity}
+                    readOnly
+                    placeholder="Auto"
+                    title="F. Purity = Purity + WST"
+                  />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-900">Charges</label>
@@ -362,39 +379,92 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
               </div>
             </div>
 
-            {/* Final Weights + Charge Details */}
-            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-zinc-200 bg-emerald-50/40 p-4">
+            {/* Final Weights + Charge Details — Final Weights narrow, Customer Charges uses rest */}
+            <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+              <div className="min-w-0 rounded-lg border border-zinc-200 bg-emerald-50/40 p-4">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Final Weights</h3>
                 <div className="grid min-w-0 grid-cols-2 gap-4">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-zinc-900">FFN WT</label>
-                    <input type="number" className={inputClass} value={form.ffnWt || ""} onChange={(e) => update({ ffnWt: Number(e.target.value) || 0 })} placeholder="FFN weight" />
+                    <input
+                      type="number"
+                      className={`${inputClass} bg-gray-50`}
+                      value={derivedFFnWt === 0 ? "" : derivedFFnWt}
+                      readOnly
+                      placeholder="Auto"
+                      title="FFN WT = NT WT × (F. Purity%)"
+                    />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-zinc-900">FN WT</label>
-                    <input type="number" className={inputClass} value={form.fnWt || ""} onChange={(e) => update({ fnWt: Number(e.target.value) || 0 })} placeholder="Fine weight" />
+                    <input
+                      type="number"
+                      className={`${inputClass} bg-gray-50`}
+                      value={derivedFnWt === 0 ? "" : derivedFnWt}
+                      readOnly
+                      placeholder="Auto"
+                      title="FN WT = NT WT × (Purity%)"
+                    />
                   </div>
                 </div>
               </div>
-              <div className="rounded-lg border border-zinc-200 bg-sky-50/50 p-4">
+              <div className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-sky-50/50 p-4">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Customer Charges details</h3>
-                <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-4">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">Cust  WST</label>
-                    <input type="number" className={inputClass} value={form.cw || ""} onChange={(e) => update({ cw: Number(e.target.value) || 0 })} placeholder="0" />
+                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="min-w-0 space-y-1 lg:min-w-[130px]">
+                    <label className="block text-xs font-medium text-zinc-900">Cust WST</label>
+                    <input
+                      type="number"
+                      className={inputClass}
+                      value={form.cw || ""}
+                      onChange={(e) => update({ cw: Number(e.target.value) || 0 })}
+                      placeholder="0"
+                    />
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">Lbr Chrg</label>
-                    <input type="number" className={inputClass} value={form.lbrChrg || ""} onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })} placeholder="Labor charge" />
+                  <div className="min-w-0 space-y-1 lg:min-w-[150px]">
+                    <label className="block text-xs font-medium text-zinc-900">Lbr Chrg</label>
+                    <div className="flex min-w-0 gap-2">
+                      <select
+                        className={`${inputClass} w-14 shrink-0`}
+                        value={form.lbrChrgType}
+                        onChange={(e) => update({ lbrChrgType: e.target.value as ChargeBasis })}
+                      >
+                        {CHARGE_BASIS_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.lbrChrg || ""} onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })} placeholder="Labor charge" />
+                    </div>
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">Mkg Chrg</label>
-                    <input type="number" className={inputClass} value={form.mkgChrg || ""} onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })} placeholder="Making charge" />
+                  <div className="min-w-0 space-y-1 lg:min-w-[150px]">
+                    <label className="block text-xs font-medium text-zinc-900">Mkg Chrg</label>
+                    <div className="flex min-w-0 gap-2">
+                      <select
+                        className={`${inputClass} w-14 shrink-0`}
+                        value={form.mkgChrgType}
+                        onChange={(e) => update({ mkgChrgType: e.target.value as ChargeBasis })}
+                      >
+                        {CHARGE_BASIS_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.mkgChrg || ""} onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })} placeholder="Making charge" />
+                    </div>
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
-                    <input type="number" className={inputClass} value={form.othCh || ""} onChange={(e) => update({ othCh: Number(e.target.value) || 0 })} placeholder="Total hallmark charges" />
+                  <div className="min-w-0 space-y-1 lg:min-w-[160px]">
+                    <label className="block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
+                    <div className="flex min-w-0 gap-2">
+                      <select
+                        className={`${inputClass} w-14 shrink-0`}
+                        value={form.othChChrgType}
+                        onChange={(e) => update({ othChChrgType: e.target.value as ChargeBasis })}
+                      >
+                        {CHARGE_BASIS_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.othCh || ""} onChange={(e) => update({ othCh: Number(e.target.value) || 0 })} placeholder="Total hallmark charges" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -409,7 +479,7 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                   step="0.01"
                   value={form.valuation === 0 ? "" : form.valuation}
                   onChange={(e) => update({ valuation: Number(e.target.value) || 0 })}
-                  placeholder={(form.ntWt * (form.metalRate || 0)).toFixed(2)}
+                  placeholder={(derivedNtWt * (form.metalRate || 0)).toFixed(2)}
                   className={inputClass}
                 />
               </div>

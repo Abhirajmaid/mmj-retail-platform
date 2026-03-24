@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Camera, Upload, FileText, Gem, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import { useCrystalStore } from "@/src/store/stock-store";
-import { MONTHS } from "@/src/types/firm";
+import { useFirmStore } from "@/src/store/firm-store";
+
+const BRAND_SELLER_OPTIONS = ["", "MMJ", "Partner", "Other"];
+const GENDER_OPTIONS = ["", "Male", "Female"];
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
@@ -15,12 +18,15 @@ export function CrystalStockTab() {
   const pendingEntries = useCrystalStore((s) => s.pendingEntries);
   const confirmEntry = useCrystalStore((s) => s.confirmEntry);
   const deletePending = useCrystalStore((s) => s.deletePending);
+  const { firms, fetchFirms } = useFirmStore();
+
+  useEffect(() => {
+    void fetchFirms();
+  }, [fetchFirms]);
 
   const [form, setForm] = useState({
-    billDateDD: "",
-    billDateMM: "",
-    billDateYYYY: "",
-    firm: "OM3",
+    billDate: new Date().toISOString().slice(0, 10),
+    firm: "",
     itemId: "1",
     brandSellerName: "",
     gender: "",
@@ -49,15 +55,12 @@ export function CrystalStockTab() {
   const update = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   const handleSubmit = () => {
-    const billDate = [form.billDateDD, form.billDateMM, form.billDateYYYY]
-      .filter(Boolean)
-      .join("-");
     const valuation = form.gsWt * (form.purchaseRate || 0);
     const totalTax = (form.cgstAmt || 0) + (form.sgstAmt || 0) + (form.igstAmt || 0);
     const finalVal = valuation + totalTax;
 
     addPending({
-      billDate: billDate || new Date().toISOString().slice(0, 10),
+      billDate: form.billDate || new Date().toISOString().slice(0, 10),
       firm: form.firm,
       itemId: form.itemId,
       brandSellerName: form.brandSellerName,
@@ -113,32 +116,53 @@ export function CrystalStockTab() {
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Bill Date</label>
-              <div className="flex gap-2">
-                <input placeholder="DD" className={inputClass} value={form.billDateDD} onChange={(e) => update({ billDateDD: e.target.value })} maxLength={2} />
-                <select className={inputClass} value={form.billDateMM} onChange={(e) => update({ billDateMM: e.target.value })}>
-                  <option value="">MON</option>
-                  {MONTHS.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-                <input placeholder="YYYY" className={inputClass} value={form.billDateYYYY} onChange={(e) => update({ billDateYYYY: e.target.value })} maxLength={4} />
-              </div>
+              <input
+                type="date"
+                className={inputClass}
+                value={form.billDate}
+                onChange={(e) => update({ billDate: e.target.value })}
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Firm</label>
-              <input className={inputClass} value={form.firm} onChange={(e) => update({ firm: e.target.value })} />
+              <select
+                className={inputClass}
+                value={form.firm}
+                onChange={(e) => update({ firm: e.target.value })}
+              >
+                <option value="">— Select firm —</option>
+                {firms.map((f) => (
+                  <option key={f.id} value={f.id}>{f.shopName}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Item ID (Stone)</label>
-              <input className={inputClass} value={form.itemId} onChange={(e) => update({ itemId: e.target.value })} />
+              <input className={inputClass} value={form.itemId} onChange={(e) => update({ itemId: e.target.value })} placeholder="Item ID" />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Brand / Seller Name</label>
-              <input className={inputClass} value={form.brandSellerName} onChange={(e) => update({ brandSellerName: e.target.value })} />
+              <select
+                className={inputClass}
+                value={form.brandSellerName}
+                onChange={(e) => update({ brandSellerName: e.target.value })}
+              >
+                {BRAND_SELLER_OPTIONS.map((opt) => (
+                  <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Gender</label>
-              <input className={inputClass} value={form.gender} onChange={(e) => update({ gender: e.target.value })} />
+              <select
+                className={inputClass}
+                value={form.gender}
+                onChange={(e) => update({ gender: e.target.value })}
+              >
+                {GENDER_OPTIONS.map((opt) => (
+                  <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Images / Photos</label>
