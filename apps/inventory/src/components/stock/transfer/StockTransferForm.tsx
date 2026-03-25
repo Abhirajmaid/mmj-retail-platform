@@ -2,15 +2,17 @@
 
 import { useCallback, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, ArrowLeft } from "lucide-react";
 import { Button } from "@jewellery-retail/ui";
 import { useStockMovements } from "@jewellery-retail/hooks";
+import { PageHeader } from "@jewellery-retail/ui";
 import { useStockTransferStore } from "@/src/store/stockTransferStore";
 import { useFirmStore } from "@/src/store/firm-store";
 import type { StockTransferItem } from "@/src/types/stockTransfer";
 import { FirmSelectorBar } from "./FirmSelectorBar";
 import { StockTransferDropdown } from "./StockTransferDropdown";
 import { TransferOptionsBar } from "./TransferOptionsBar";
+import { CounterSelectorBar } from "./CounterSelectorBar";
+import { StaffSelectorBar } from "./StaffSelectorBar";
 import { ProductBarcodeSearch, type StockSearchItem } from "./ProductBarcodeSearch";
 import { TransferSummaryRow } from "./TransferSummaryRow";
 
@@ -178,25 +180,23 @@ export function StockTransferForm() {
 
   return (
     <div className="min-w-0 space-y-6">
-      {/* Page header: title + firm selector + STOCK TRANSFER dropdown */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-            <ArrowLeftRight className="h-5 w-5" />
-          </span>
-          <h1 className="text-xl font-bold uppercase tracking-wide text-zinc-900">
-            STOCK TRANSFER
-          </h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <FirmSelectorBar />
-          <StockTransferDropdown />
-        </div>
-      </div>
+      {/* Header bar (matches PageHeader style used across the app) */}
+      <PageHeader
+        title="Stock Transfer"
+        description="Choose a source firm, counter, staff, and transfer action. Then complete the transfer options below."
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <FirmSelectorBar />
+            <CounterSelectorBar />
+            <StaffSelectorBar />
+            <StockTransferDropdown />
+          </div>
+        }
+      />
 
       {!viewingFirmId && firms.length > 0 && (
         <p className="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Select a firm (top right) to choose the source, then select the destination in SELECT FIRM below.
+          Select source context in the top bar (Firm / Counter / Staff), then select the destination in `SELECT FIRM` below.
         </p>
       )}
 

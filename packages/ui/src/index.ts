@@ -4,6 +4,7 @@ export { Button, buttonVariants } from "./components/button";
 export { Input } from "./components/input";
 export { PageHeader, type BreadcrumbItem } from "./components/page-header";
 export { StatCard } from "./components/stat-card";
+export { KpiCard, type KpiCardProps } from "./components/kpi-card";
 export { Navbar } from "./components/navbar";
 export { Sidebar } from "./components/sidebar";
 export { BrandLogo } from "./components/brand-logo";

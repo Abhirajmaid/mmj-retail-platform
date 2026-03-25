@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { PageHeader } from "@jewellery-retail/ui";
 
 const COUNTER_OPTIONS = ["Counter A", "Counter B", "Counter C"];
 const STAFF_OPTIONS = ["Staff 1", "Staff 2", "Staff 3"];
@@ -61,149 +62,151 @@ export function TransferOptionsBar({
   const voucherDisplay = `${voucherPrefix}-${voucherNumber}`;
 
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-border bg-white px-6">
-      <h2 className="text-lg font-semibold text-foreground">SELECT TRANSFER OPTIONS</h2>
-      <div className="flex items-center gap-3">
-        {/* 1. Counter dropdown */}
-        <div className="relative" ref={counterRef}>
-          <button
-            type="button"
-            onClick={() => {
-              setCounterOpen((o) => !o);
-              setStaffOpen(false);
-              setFirmOpen(false);
-            }}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-amber-50"
-          >
-            {counter ?? "SELECT COUNTER"}
-            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${counterOpen ? "rotate-180" : ""}`} />
-          </button>
-          {counterOpen && (
-            <div className="absolute left-0 top-full z-20 mt-1 min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <button
-                type="button"
-                onClick={() => {
-                  onCounterSelect(null);
-                  setCounterOpen(false);
-                }}
-                className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${counter === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
-              >
-                {UNSELECT_LABEL}
-              </button>
-              {COUNTER_OPTIONS.map((c) => (
+    <PageHeader
+      title="Select Transfer Options"
+      actions={
+        <div className="flex flex-wrap items-center gap-3">
+          {/* 1. Counter dropdown */}
+          <div className="relative" ref={counterRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setCounterOpen((o) => !o);
+                setStaffOpen(false);
+                setFirmOpen(false);
+              }}
+              className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-slate-50"
+            >
+              {counter ?? "SELECT COUNTER"}
+              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${counterOpen ? "rotate-180" : ""}`} />
+            </button>
+            {counterOpen && (
+              <div className="absolute left-0 top-full z-20 mt-1 min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
                 <button
-                  key={c}
                   type="button"
                   onClick={() => {
-                    onCounterSelect(c);
+                    onCounterSelect(null);
                     setCounterOpen(false);
                   }}
-                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${counter === c ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${counter === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
                 >
-                  {c}
+                  {UNSELECT_LABEL}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+                {COUNTER_OPTIONS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      onCounterSelect(c);
+                      setCounterOpen(false);
+                    }}
+                    className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${counter === c ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* 2. Staff dropdown — includes Unselect */}
-        <div className="relative" ref={staffRef}>
-          <button
-            type="button"
-            onClick={() => {
-              setStaffOpen((o) => !o);
-              setCounterOpen(false);
-              setFirmOpen(false);
-            }}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-amber-50"
-          >
-            {staff ?? "SELECT STAFF"}
-            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${staffOpen ? "rotate-180" : ""}`} />
-          </button>
-          {staffOpen && (
-            <div className="absolute left-0 top-full z-20 mt-1 min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <button
-                type="button"
-                onClick={() => {
-                  onStaffSelect(null);
-                  setStaffOpen(false);
-                }}
-                className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${staff === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
-              >
-                {UNSELECT_LABEL}
-              </button>
-              {STAFF_OPTIONS.map((s) => (
+          {/* 2. Staff dropdown — includes Unselect */}
+          <div className="relative" ref={staffRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setStaffOpen((o) => !o);
+                setCounterOpen(false);
+                setFirmOpen(false);
+              }}
+              className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-slate-50"
+            >
+              {staff ?? "SELECT STAFF"}
+              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${staffOpen ? "rotate-180" : ""}`} />
+            </button>
+            {staffOpen && (
+              <div className="absolute left-0 top-full z-20 mt-1 min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
                 <button
-                  key={s}
                   type="button"
                   onClick={() => {
-                    onStaffSelect(s);
+                    onStaffSelect(null);
                     setStaffOpen(false);
                   }}
-                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${staff === s ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${staff === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
                 >
-                  {s}
+                  {UNSELECT_LABEL}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+                {STAFF_OPTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      onStaffSelect(s);
+                      setStaffOpen(false);
+                    }}
+                    className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${staff === s ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* 3. Firm dropdown */}
-        <div className="relative" ref={firmRef}>
-          <button
-            type="button"
-            onClick={() => {
-              setFirmOpen((o) => !o);
-              setCounterOpen(false);
-              setStaffOpen(false);
-            }}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-lg border-2 border-slate-200 border-l-4 border-l-amber-500 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-amber-50"
-          >
-            {firmLabel}
-            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${firmOpen ? "rotate-180" : ""}`} />
-          </button>
-          {firmOpen && (
-            <div className="absolute left-0 top-full z-20 mt-1 min-w-[160px] max-h-[280px] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <button
-                type="button"
-                onClick={() => {
-                  onFirmChange(null);
-                  setFirmOpen(false);
-                }}
-                className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${firm === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
-              >
-                {UNSELECT_LABEL}
-              </button>
-              {firmOptions.map((opt) => (
+          {/* 3. Firm dropdown */}
+          <div className="relative" ref={firmRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setFirmOpen((o) => !o);
+                setCounterOpen(false);
+                setStaffOpen(false);
+              }}
+              className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-zinc-900 transition-colors hover:bg-slate-50"
+            >
+              {firmLabel}
+              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${firmOpen ? "rotate-180" : ""}`} />
+            </button>
+            {firmOpen && (
+              <div className="absolute left-0 top-full z-20 mt-1 min-w-[160px] max-h-[280px] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
                 <button
-                  key={opt.id}
                   type="button"
                   onClick={() => {
-                    onFirmChange(opt.id);
+                    onFirmChange(null);
                     setFirmOpen(false);
                   }}
-                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${firm === opt.id ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${firm === null ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
                 >
-                  {opt.label}
+                  {UNSELECT_LABEL}
                 </button>
-              ))}
-              {firmOptions.length === 0 && (
-                <p className="px-4 py-2 text-xs text-zinc-500">No firms. Create one on the Firm page.</p>
-              )}
-            </div>
-          )}
-        </div>
+                {firmOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      onFirmChange(opt.id);
+                      setFirmOpen(false);
+                    }}
+                    className={`block w-full px-4 py-2.5 text-left text-sm font-bold ${firm === opt.id ? "bg-[#1E3A8A]/10 text-[#1E3A8A]" : "text-zinc-900 hover:bg-slate-50"}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {firmOptions.length === 0 && (
+                  <p className="px-4 py-2 text-xs text-zinc-500">No firms. Create one on the Firm page.</p>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Voucher number on the right of the bar */}
-        <div className="ml-4 flex items-center gap-2 border-l border-slate-200 pl-4">
-          <span className="text-sm font-semibold text-zinc-600">VOUCHER NUMBER</span>
-          <span className="min-w-[4rem] rounded border border-slate-200 bg-slate-50 px-2 py-1.5 font-mono text-sm font-medium text-zinc-900">
-            {voucherDisplay}
-          </span>
+          {/* Voucher number on the right of the bar */}
+          <div className="ml-4 flex items-center gap-2 border-l border-slate-200 pl-4">
+            <span className="text-sm font-semibold text-zinc-600">VOUCHER NUMBER</span>
+            <span className="min-w-[4rem] rounded border border-slate-200 bg-slate-50 px-2 py-1.5 font-mono text-sm font-medium text-zinc-900">
+              {voucherDisplay}
+            </span>
+          </div>
         </div>
-      </div>
-    </header>
+      }
+    />
   );
 }

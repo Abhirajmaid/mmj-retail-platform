@@ -9,6 +9,8 @@
 - Main Stock page: "Transfer stock" button now links to `/stock/transfer`; Transfer movements show a "Transfer" badge and are clickable to open the transfer list.
 - Other Options dropdown (on Add Stock page): "Stock transfer" links to `/stock/transfer`.
 - Fine Stock tab (Add Stock): "ALL GOLD STOCK LIST" button shows Gold Stock List table with « BACK.
+- **UI update (header bar):** the `/stock/transfer` form now uses `@jewellery-retail/ui`’s shared `PageHeader` styling (matching the `stock` page header pattern) and adds `Counter` + `Staff` dropdowns next to `Firm` in the top action bar.
+- **UI update (options bar):** the `SELECT TRANSFER OPTIONS` bar now matches the same `PageHeader` styling and removes the amber left-border accent from the Counter/Staff/Firm option dropdowns.
 
 ## Why
 

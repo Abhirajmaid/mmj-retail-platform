@@ -123,7 +123,7 @@ export function StockTable({
       <StockTabs
         tabItems={tabItems}
         activeTab={movementFilter}
-        onTabChange={setMovementFilter}
+        onTabChange={(tab) => setMovementFilter(tab as MovementFilter)}
         searchQuery={productNameSearch}
         onSearchChange={setProductNameSearch}
         onFilterClick={() => setIsFilterModalOpen(true)}
@@ -184,9 +184,13 @@ export function StockTable({
                         ? "border-b border-zinc-100 bg-amber-50"
                         : "border-b border-zinc-100 bg-white"
                     }
-                    onClick={isTransfer ? () => router.push("/stock/transfer/list") : undefined}
-                    role={isTransfer ? "button" : undefined}
-                    style={isTransfer ? { cursor: "pointer" } : undefined}
+                    onClick={
+                      isTransfer
+                        ? () => router.push("/stock/transfer/list")
+                        : () => router.push(`/stock/${m.id}`)
+                    }
+                    role="button"
+                    style={{ cursor: "pointer" }}
                   >
                     <TableCell className="py-2 pl-4 min-w-0">
                       <div className="min-w-0">

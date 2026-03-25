@@ -87,13 +87,6 @@ export default function StockPage() {
             </Button>
             <Button
               variant="outline"
-              
-            >
-              <Minus className="mr-2 h-4 w-4" />
-              Remove stock
-            </Button>
-            <Button
-              variant="outline"
               asChild
             >
               <Link href="/stock/transfer">

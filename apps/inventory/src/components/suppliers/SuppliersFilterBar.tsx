@@ -6,13 +6,24 @@ import type { SupplierType } from "@jewellery-retail/types";
 
 export type SupplierStatusTab = "all" | "active" | "pending" | "inactive";
 
-export const SUPPLIER_TYPE_OPTIONS: { value: SupplierType | "all"; label: string }[] = [
+/** Shown as main tabs (stock bar style). */
+export const SUPPLIER_PRIMARY_TYPE_TABS: { value: SupplierType | "all"; label: string }[] = [
   { value: "all", label: "All Types" },
   { value: "gold", label: "Gold Supplier" },
-  { value: "diamond", label: "Diamond Supplier" },
   { value: "silver", label: "Silver Supplier" },
+];
+
+/** Diamond, stone, and other — opened from “More types” dropdown. */
+export const SUPPLIER_MORE_TYPE_OPTIONS: { value: SupplierType; label: string }[] = [
+  { value: "diamond", label: "Diamond Supplier" },
   { value: "stone", label: "Stone Supplier" },
   { value: "other", label: "Other" },
+];
+
+/** Full list for lookups (labels, etc.). */
+export const SUPPLIER_TYPE_OPTIONS: { value: SupplierType | "all"; label: string }[] = [
+  ...SUPPLIER_PRIMARY_TYPE_TABS,
+  ...SUPPLIER_MORE_TYPE_OPTIONS,
 ];
 
 export type SupplierSortOption = "name" | "city" | "onTimeRate" | "openOrders";

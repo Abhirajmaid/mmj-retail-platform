@@ -6,17 +6,19 @@ import { Input } from "@jewellery-retail/ui";
 export type MovementFilter = "All" | "Inbound" | "Outbound" | "Transfer";
 
 export interface StockTabItem {
-  key: MovementFilter;
+  key: string;
   label: string;
   count?: number;
 }
 
 interface StockTabsProps {
   tabItems: StockTabItem[];
-  activeTab: MovementFilter;
-  onTabChange: (tab: MovementFilter) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  /** @default "Search by product name..." */
+  searchPlaceholder?: string;
   onExportClick?: () => void;
   onFilterClick?: () => void;
   onColumnVisibilityClick?: () => void;
@@ -24,12 +26,15 @@ interface StockTabsProps {
   hasActiveFilters?: boolean;
 }
 
+const DEFAULT_SEARCH_PLACEHOLDER = "Search by product name...";
+
 export function StockTabs({
   tabItems,
   activeTab,
   onTabChange,
   searchQuery,
   onSearchChange,
+  searchPlaceholder = DEFAULT_SEARCH_PLACEHOLDER,
   onExportClick,
   onFilterClick,
   onColumnVisibilityClick,
@@ -37,7 +42,7 @@ export function StockTabs({
   hasActiveFilters = false,
 }: StockTabsProps) {
   return (
-    <div className="rounded-xl bg-white shadow-md px-4 py-3 sm:px-4 sm:py-3">
+    <div className="rounded-xl bg-white px-4 py-3 shadow-md sm:px-4 sm:py-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         {/* Left: Movement type tabs */}
         <div className="flex flex-wrap items-center gap-2">
@@ -60,14 +65,14 @@ export function StockTabs({
 
         {/* Right: Search + circular actions + Export */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <div className="relative min-w-0 flex-1 sm:w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <Input
               type="search"
-              placeholder="Search by product name..."
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-10 pl-10 rounded-xl border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 shadow-md"
+              className="h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
             />
           </div>
 

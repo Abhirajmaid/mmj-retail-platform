@@ -44,7 +44,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "rounded-[28px] border border-zinc-100 bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.06),0_24px_60px_-28px_rgba(15,23,42,0.14)] sm:px-6 sm:py-5",
+        "rounded-[28px] border border-zinc-100  px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.06),0_24px_60px_-28px_rgba(15,23,42,0.14)] sm:px-6 sm:py-5",
         className
       )}
     >

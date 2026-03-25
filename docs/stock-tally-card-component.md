@@ -5,6 +5,7 @@
 - **Layout:** `min-w-0 max-w-full space-y-4 sm:space-y-6` aligned with firm/stock listing pages.
 - **Top control block:** Frosted `Card` (`rounded-2xl`, gradient, blur, shadow) matching `StockKPIs` / `FirmKPIs`.
 - **Available / Scanned columns:** `TallyColumnShell` — KPI-style header (large total, optional weight line, status dot, icon in tinted `rounded-xl` box) plus scroll body on `bg-zinc-50/50`.
+- **Column chrome:** outer `TallyColumnShell` containers now use a subtle Card shadow + `border-zinc-100` so the border remains visible on white backgrounds.
 - **Line items:** `rounded-xl border border-zinc-200 bg-white` rows (aligned with stock table container styling); monospace tag on the right; dashed empty states when lists are empty.
 - **Scanned rows:** Subtle `ring-emerald-100/60` to echo the emerald tally column without flat green headers.
 

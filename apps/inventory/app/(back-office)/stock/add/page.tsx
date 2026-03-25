@@ -43,8 +43,8 @@ export default function AddStockPage() {
         }
       />
 
-      {/* Tab bar — matches Firm tabs: white card, amber active, zinc inactive */}
-      <div className="sticky top-0 z-20 rounded-xl border border-zinc-100 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+      {/* Tab bar — consistent with other stock tabs: single white card layer */}
+      <div className="sticky top-0 z-20 rounded-xl bg-white px-4 py-3 shadow-md">
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {ADD_STOCK_TABS.map((tab) => {
             const label = STOCK_TAB_LABELS[tab];
@@ -55,9 +55,9 @@ export default function AddStockPage() {
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
                   isActive
-                    ? "bg-amber-500 text-white shadow-md"
+                    ? "bg-amber-500 text-white shadow-lg"
                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800"
                 }`}
               >

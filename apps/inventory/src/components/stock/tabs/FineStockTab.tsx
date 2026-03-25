@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Camera, Upload, Barcode, Gem, FileText, Package, ArrowLeft, ArrowRight } from "lucide-react";
+import { Camera, Upload, Barcode, Gem, FileText, Package, ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import { useFineStockStore } from "@/src/store/stock-store";
 import { useFirmStore } from "@/src/store/firm-store";
@@ -21,6 +21,10 @@ const CHARGE_BASIS_OPTIONS: { value: ChargeBasis; label: string }[] = [
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
+
+const selectClass = `${inputClass} appearance-none bg-white pr-10`;
+const selectChevronClass =
+  "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400";
 
 interface FineStockTabProps {
   isImitation?: boolean;
@@ -178,28 +182,34 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Firm</label>
-              <select
-                className={inputClass}
-                value={form.firm}
-                onChange={(e) => update({ firm: e.target.value })}
-              >
-                <option value="">— Select firm —</option>
-                {firms.map((f) => (
-                  <option key={f.id} value={f.id}>{f.shopName}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.firm}
+                  onChange={(e) => update({ firm: e.target.value })}
+                >
+                  <option value="">— Select firm —</option>
+                  {firms.map((f) => (
+                    <option key={f.id} value={f.id}>{f.shopName}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Metal</label>
-              <select
-                className={inputClass}
-                value={form.metal}
-                onChange={(e) => update({ metal: e.target.value as MetalType })}
-              >
-                {METAL_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.metal}
+                  onChange={(e) => update({ metal: e.target.value as MetalType })}
+                >
+                  {METAL_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Product Code</label>
@@ -212,15 +222,18 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Brand / Seller Name</label>
-              <select
-                className={inputClass}
-                value={form.brandSellerName}
-                onChange={(e) => update({ brandSellerName: e.target.value })}
-              >
-                {BRAND_SELLER_OPTIONS.map((opt) => (
-                  <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.brandSellerName}
+                  onChange={(e) => update({ brandSellerName: e.target.value })}
+                >
+                  {BRAND_SELLER_OPTIONS.map((opt) => (
+                    <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Counter Name</label>
@@ -233,15 +246,18 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Gender BIS</label>
-              <select
-                className={inputClass}
-                value={form.genderBis}
-                onChange={(e) => update({ genderBis: e.target.value })}
-              >
-                {GENDER_OPTIONS.map((opt) => (
-                  <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.genderBis}
+                  onChange={(e) => update({ genderBis: e.target.value })}
+                >
+                  {GENDER_OPTIONS.map((opt) => (
+                    <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Img / Photos</label>
@@ -379,53 +395,59 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
               </div>
             </div>
 
-            {/* Final Weights + Charge Details — Final Weights narrow, Customer Charges uses rest */}
-            <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-              <div className="min-w-0 rounded-lg border border-zinc-200 bg-emerald-50/40 p-4">
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Final Weights</h3>
-                <div className="grid min-w-0 grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">FFN WT</label>
-                    <input
-                      type="number"
-                      className={`${inputClass} bg-gray-50`}
-                      value={derivedFFnWt === 0 ? "" : derivedFFnWt}
-                      readOnly
-                      placeholder="Auto"
-                      title="FFN WT = NT WT × (F. Purity%)"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-900">FN WT</label>
-                    <input
-                      type="number"
-                      className={`${inputClass} bg-gray-50`}
-                      value={derivedFnWt === 0 ? "" : derivedFnWt}
-                      readOnly
-                      placeholder="Auto"
-                      title="FN WT = NT WT × (Purity%)"
-                    />
-                  </div>
+            {/* Final Weights */}
+            <div className="min-w-0 rounded-lg border border-zinc-200 bg-emerald-50/40 p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Final Weights</h3>
+              <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">FFN WT</label>
+                  <input
+                    type="number"
+                    className={`${inputClass} bg-gray-50`}
+                    value={derivedFFnWt === 0 ? "" : derivedFFnWt}
+                    readOnly
+                    placeholder="Auto"
+                    title="FFN WT = NT WT × (F. Purity%)"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">FN WT</label>
+                  <input
+                    type="number"
+                    className={`${inputClass} bg-gray-50`}
+                    value={derivedFnWt === 0 ? "" : derivedFnWt}
+                    readOnly
+                    placeholder="Auto"
+                    title="FN WT = NT WT × (Purity%)"
+                  />
                 </div>
               </div>
-              <div className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-sky-50/50 p-4">
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Customer Charges details</h3>
-                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="min-w-0 space-y-1 lg:min-w-[130px]">
-                    <label className="block text-xs font-medium text-zinc-900">Cust WST</label>
-                    <input
-                      type="number"
-                      className={inputClass}
-                      value={form.cw || ""}
-                      onChange={(e) => update({ cw: Number(e.target.value) || 0 })}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="min-w-0 space-y-1 lg:min-w-[150px]">
-                    <label className="block text-xs font-medium text-zinc-900">Lbr Chrg</label>
-                    <div className="flex min-w-0 gap-2">
+            </div>
+
+            {/* Customer Charges — full width, 2-col grid so each unit+value pair has room */}
+            <div className="min-w-0 rounded-lg border border-zinc-200 bg-sky-50/50 p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Customer Charges Details</h3>
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+                {/* Cust WST */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-medium text-zinc-900">Cust WST</label>
+                  <input
+                    type="number"
+                    className={inputClass}
+                    value={form.cw || ""}
+                    onChange={(e) => update({ cw: Number(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                </div>
+
+                {/* Lbr Chrg */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-medium text-zinc-900">Lbr Chrg</label>
+                  <div className="flex gap-2">
+                    <div className="relative w-20 shrink-0">
                       <select
-                        className={`${inputClass} w-14 shrink-0`}
+                        className={`${selectClass} w-full`}
                         value={form.lbrChrgType}
                         onChange={(e) => update({ lbrChrgType: e.target.value as ChargeBasis })}
                       >
@@ -433,14 +455,25 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                           <option key={o.value} value={o.value}>{o.label}</option>
                         ))}
                       </select>
-                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.lbrChrg || ""} onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })} placeholder="Labor charge" />
+                      <ChevronDown className={selectChevronClass} aria-hidden />
                     </div>
+                    <input
+                      type="number"
+                      className={`${inputClass} flex-1`}
+                      value={form.lbrChrg || ""}
+                      onChange={(e) => update({ lbrChrg: Number(e.target.value) || 0 })}
+                      placeholder="0"
+                    />
                   </div>
-                  <div className="min-w-0 space-y-1 lg:min-w-[150px]">
-                    <label className="block text-xs font-medium text-zinc-900">Mkg Chrg</label>
-                    <div className="flex min-w-0 gap-2">
+                </div>
+
+                {/* Mkg Chrg */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-medium text-zinc-900">Mkg Chrg</label>
+                  <div className="flex gap-2">
+                    <div className="relative w-20 shrink-0">
                       <select
-                        className={`${inputClass} w-14 shrink-0`}
+                        className={`${selectClass} w-full`}
                         value={form.mkgChrgType}
                         onChange={(e) => update({ mkgChrgType: e.target.value as ChargeBasis })}
                       >
@@ -448,14 +481,25 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                           <option key={o.value} value={o.value}>{o.label}</option>
                         ))}
                       </select>
-                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.mkgChrg || ""} onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })} placeholder="Making charge" />
+                      <ChevronDown className={selectChevronClass} aria-hidden />
                     </div>
+                    <input
+                      type="number"
+                      className={`${inputClass} flex-1`}
+                      value={form.mkgChrg || ""}
+                      onChange={(e) => update({ mkgChrg: Number(e.target.value) || 0 })}
+                      placeholder="0"
+                    />
                   </div>
-                  <div className="min-w-0 space-y-1 lg:min-w-[160px]">
-                    <label className="block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
-                    <div className="flex min-w-0 gap-2">
+                </div>
+
+                {/* Tot Hallmark Chrgs */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-medium text-zinc-900">Tot Hallmark Chrgs</label>
+                  <div className="flex gap-2">
+                    <div className="relative w-20 shrink-0">
                       <select
-                        className={`${inputClass} w-14 shrink-0`}
+                        className={`${selectClass} w-full`}
                         value={form.othChChrgType}
                         onChange={(e) => update({ othChChrgType: e.target.value as ChargeBasis })}
                       >
@@ -463,14 +507,22 @@ export function FineStockTab({ isImitation = false }: FineStockTabProps) {
                           <option key={o.value} value={o.value}>{o.label}</option>
                         ))}
                       </select>
-                      <input type="number" className={`${inputClass} min-w-[4rem] flex-1`} value={form.othCh || ""} onChange={(e) => update({ othCh: Number(e.target.value) || 0 })} placeholder="Total hallmark charges" />
+                      <ChevronDown className={selectChevronClass} aria-hidden />
                     </div>
+                    <input
+                      type="number"
+                      className={`${inputClass} flex-1`}
+                      value={form.othCh || ""}
+                      onChange={(e) => update({ othCh: Number(e.target.value) || 0 })}
+                      placeholder="0"
+                    />
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-zinc-100 bg-white p-4">
+          <div className="rounded-lg border border-zinc-200 bg-white p-4">
             <div className="flex flex-wrap items-end gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-zinc-900">Valuation</label>

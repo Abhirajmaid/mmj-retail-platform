@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Button, Card, CardBody, CardHeader, CardTitle, Input } from "@jewellery-retail/ui";
+import { ArrowLeft, FileText, MapPin, Landmark, Activity } from "lucide-react";
+import { Button, Card, CardBody, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import type { Supplier, SupplierType } from "@jewellery-retail/types";
 
 const inputClass =
@@ -102,9 +101,15 @@ interface AddSupplierFormProps {
   onSubmit: (supplier: Supplier) => void;
   onCancel: () => void;
   disabled?: boolean;
+  activeTab?: "supplier" | "contact" | "bank" | "performance";
 }
 
-export function AddSupplierForm({ onSubmit, onCancel, disabled = false }: AddSupplierFormProps) {
+export function AddSupplierForm({
+  onSubmit,
+  onCancel,
+  disabled = false,
+  activeTab = "supplier",
+}: AddSupplierFormProps) {
   const [values, setValues] = useState<AddSupplierFormValues>(defaultValues);
   const [errors, setErrors] = useState<Partial<Record<keyof AddSupplierFormValues, string>>>({});
 
@@ -199,300 +204,356 @@ export function AddSupplierForm({ onSubmit, onCancel, disabled = false }: AddSup
         <span>Fields marked in <span className="font-medium text-red-500">red</span> are required.</span>
       </p>
 
-      <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
-        {/* Section 1 — Supplier Information */}
-        <Card className="min-w-0 rounded-xl border border-zinc-100 bg-white shadow-md" padding="lg">
-          <CardHeader className="border-b border-amber-200/60 pb-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Supplier Information</p>
-          </CardHeader>
-          <CardBody className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2">
-            <Input
-              label="Supplier Name *"
-              name="name"
-              value={values.name}
-              onChange={(e) => set("name", e.target.value)}
-              className={inputClass}
-              error={errors.name}
-            />
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Supplier Type</label>
-              <select
-                value={values.supplierType}
-                onChange={(e) => set("supplierType", e.target.value as SupplierType)}
-                className={inputClass}
-              >
-                <option value="">Select type</option>
-                {SUPPLIER_TYPES.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <Input
-              label="Business Registration Number"
-              name="businessRegistrationNumber"
-              value={values.businessRegistrationNumber}
-              onChange={(e) => set("businessRegistrationNumber", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="GST Number"
-              name="gstNumber"
-              value={values.gstNumber}
-              onChange={(e) => set("gstNumber", e.target.value)}
-              className={inputClass}
-              error={errors.gstNumber}
-            />
-            <Input
-              label="PAN Number"
-              name="panNumber"
-              value={values.panNumber}
-              onChange={(e) => set("panNumber", e.target.value)}
-              className={inputClass}
-            />
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Status</label>
-              <div className="flex flex-wrap gap-2">
-                {(["active", "inactive", "pending"] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => set("status", s)}
-                    className={`rounded-xl px-4 py-2 text-sm font-medium capitalize ${
-                      values.status === s ? "bg-amber-500 text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+      <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()} data-active-tab={activeTab}>
+        {/* Render all supplier sections on a single page */}
+        <Card className="min-w-0" padding="lg">
+            <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <FileText className="h-5 w-5" />
               </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Section 2 — Contact & Location */}
-        <Card className="min-w-0 rounded-xl border border-zinc-100 bg-white shadow-md" padding="lg">
-          <CardHeader className="border-b border-amber-200/60 pb-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Contact & Location</p>
-          </CardHeader>
-          <CardBody className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2">
-            <Input
-              label="Contact Person *"
-              name="contactPerson"
-              value={values.contactPerson}
-              onChange={(e) => set("contactPerson", e.target.value)}
-              className={inputClass}
-              error={errors.contactPerson}
-            />
-            <Input
-              label="Phone Number *"
-              name="phone"
-              value={values.phone}
-              onChange={(e) => set("phone", e.target.value)}
-              className={inputClass}
-              error={errors.phone}
-              hint="Indian format"
-            />
-            <Input
-              label="Alternate Phone"
-              name="alternatePhone"
-              value={values.alternatePhone}
-              onChange={(e) => set("alternatePhone", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="Email ID"
-              name="email"
-              type="email"
-              value={values.email}
-              onChange={(e) => set("email", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="Website URL"
-              name="website"
-              value={values.website}
-              onChange={(e) => set("website", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="City *"
-              name="city"
-              value={values.city}
-              onChange={(e) => set("city", e.target.value)}
-              className={inputClass}
-              error={errors.city}
-            />
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">State</label>
-              <select
-                value={values.state}
-                onChange={(e) => set("state", e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Select state</option>
-                {INDIAN_STATES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <Input
-              label="Pincode"
-              name="pincode"
-              value={values.pincode}
-              onChange={(e) => set("pincode", e.target.value)}
-              className={inputClass}
-              error={errors.pincode}
-              hint="6 digits"
-            />
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Full Address</label>
-              <textarea
-                name="fullAddress"
-                rows={3}
-                value={values.fullAddress}
-                onChange={(e) => set("fullAddress", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Section 3 — Bank & Payment Details */}
-        <Card className="min-w-0 rounded-xl border border-zinc-100 bg-white shadow-md" padding="lg">
-          <CardHeader className="border-b border-amber-200/60 pb-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Bank & Payment Details</p>
-          </CardHeader>
-          <CardBody className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2">
-            <Input
-              label="Bank Name"
-              name="bankName"
-              value={values.bankName}
-              onChange={(e) => set("bankName", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="Account Number"
-              name="accountNumber"
-              value={values.accountNumber}
-              onChange={(e) => set("accountNumber", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="IFSC Code"
-              name="ifscCode"
-              value={values.ifscCode}
-              onChange={(e) => set("ifscCode", e.target.value.toUpperCase())}
-              className={inputClass}
-            />
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Payment Terms</label>
-              <select
-                value={values.paymentTerms}
-                onChange={(e) => set("paymentTerms", e.target.value)}
-                className={inputClass}
-              >
-                {PAYMENT_TERMS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <Input
-              label="Credit Limit (₹)"
-              name="creditLimit"
-              value={values.creditLimit}
-              onChange={(e) => set("creditLimit", e.target.value)}
-              className={inputClass}
-            />
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Currency</label>
-              <select
-                value={values.currency}
-                onChange={(e) => set("currency", e.target.value)}
-                className={inputClass}
-              >
-                <option value="INR">INR</option>
-                <option value="USD">USD</option>
-              </select>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Section 4 — Performance & Catalog */}
-        <Card className="min-w-0 rounded-xl border border-zinc-100 bg-white shadow-md" padding="lg">
-          <CardHeader className="border-b border-amber-200/60 pb-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Performance & Catalog</p>
-          </CardHeader>
-          <CardBody className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-zinc-700">Metal Types Supplied</label>
-              <div className="flex flex-wrap gap-2">
-                {METAL_TYPES.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => toggleMetal(m)}
-                    className={`rounded-xl px-3 py-1.5 text-sm font-medium ${
-                      values.metalTypes.includes(m) ? "bg-amber-500 text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-amber-50"
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <CardTitle className="text-lg font-semibold text-zinc-900">Supplier Information</CardTitle>
+                  <p className="text-sm text-zinc-500">Business identity and account status details</p>
+                </div>
+                <Button variant="outline" size="sm" className="shrink-0 border-amber-400 text-amber-700 hover:bg-amber-50">
+                  SUPPLIER
+                </Button>
               </div>
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-zinc-700">Item Categories</label>
-              <div className="flex flex-wrap gap-2">
-                {ITEM_CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => toggleCategory(c)}
-                    className={`rounded-xl px-3 py-1.5 text-sm font-medium ${
-                      values.itemCategories.includes(c) ? "bg-amber-500 text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-amber-50"
-                    }`}
+            </CardHeader>
+            <CardBody className="space-y-4 pt-0">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Supplier Name</label>
+                  <input
+                    className={inputClass}
+                    value={values.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    placeholder="Supplier name"
+                  />
+                  {errors.name ? <p className="mt-1 text-xs text-red-600">{errors.name}</p> : null}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Supplier Type</label>
+                  <select
+                    value={values.supplierType}
+                    onChange={(e) => set("supplierType", e.target.value as SupplierType)}
+                    className={inputClass}
                   >
-                    {c}
-                  </button>
-                ))}
+                    <option value="">— Select type —</option>
+                    {SUPPLIER_TYPES.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Business Reg. No</label>
+                  <input
+                    className={inputClass}
+                    value={values.businessRegistrationNumber}
+                    onChange={(e) => set("businessRegistrationNumber", e.target.value)}
+                    placeholder="REG-XXXX"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">GST Number</label>
+                  <input
+                    className={inputClass}
+                    value={values.gstNumber}
+                    onChange={(e) => set("gstNumber", e.target.value)}
+                    placeholder="GSTIN"
+                  />
+                  {errors.gstNumber ? <p className="mt-1 text-xs text-red-600">{errors.gstNumber}</p> : null}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">PAN Number</label>
+                  <input
+                    className={inputClass}
+                    value={values.panNumber}
+                    onChange={(e) => set("panNumber", e.target.value)}
+                    placeholder="PAN"
+                  />
+                </div>
+                <div className="lg:col-span-3">
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Status</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(["active", "inactive", "pending"] as const).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => set("status", s)}
+                        className={`rounded-xl px-4 py-2 text-sm font-medium capitalize ${
+                          values.status === s
+                            ? "bg-amber-500 text-white"
+                            : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <Input
-              label="On-time Rate (%)"
-              name="onTimeRate"
-              type="number"
-              min={0}
-              max={100}
-              value={values.onTimeRate}
-              onChange={(e) => set("onTimeRate", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="Lead Time (days)"
-              name="leadTimeDays"
-              value={values.leadTimeDays}
-              onChange={(e) => set("leadTimeDays", e.target.value)}
-              className={inputClass}
-            />
-            <Input
-              label="Minimum Order Value (₹)"
-              name="minimumOrderValue"
-              value={values.minimumOrderValue}
-              onChange={(e) => set("minimumOrderValue", e.target.value)}
-              className={inputClass}
-            />
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Notes / Comments</label>
-              <textarea
-                name="notes"
-                rows={3}
-                value={values.notes}
-                onChange={(e) => set("notes", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
+
+        <Card className="min-w-0" padding="lg">
+            <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <CardTitle className="text-lg font-semibold text-zinc-900">Contact & Location</CardTitle>
+                  <p className="text-sm text-zinc-500">Primary contact, address, and communication channels</p>
+                </div>
+                <Button variant="outline" size="sm" className="shrink-0 border-amber-400 text-amber-700 hover:bg-amber-50">
+                  CONTACT
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-4 pt-0">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Contact Person</label>
+                  <input
+                    className={inputClass}
+                    value={values.contactPerson}
+                    onChange={(e) => set("contactPerson", e.target.value)}
+                    placeholder="Contact person"
+                  />
+                  {errors.contactPerson ? <p className="mt-1 text-xs text-red-600">{errors.contactPerson}</p> : null}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Phone</label>
+                  <input
+                    className={inputClass}
+                    value={values.phone}
+                    onChange={(e) => set("phone", e.target.value)}
+                    placeholder="+91 ..."
+                  />
+                  {errors.phone ? <p className="mt-1 text-xs text-red-600">{errors.phone}</p> : null}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Alternate Phone</label>
+                  <input
+                    className={inputClass}
+                    value={values.alternatePhone}
+                    onChange={(e) => set("alternatePhone", e.target.value)}
+                    placeholder="Alternate"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Email</label>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={values.email}
+                    onChange={(e) => set("email", e.target.value)}
+                    placeholder="email@domain.com"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Website</label>
+                  <input
+                    className={inputClass}
+                    value={values.website}
+                    onChange={(e) => set("website", e.target.value)}
+                    placeholder="https://"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">City</label>
+                  <input
+                    className={inputClass}
+                    value={values.city}
+                    onChange={(e) => set("city", e.target.value)}
+                    placeholder="City"
+                  />
+                  {errors.city ? <p className="mt-1 text-xs text-red-600">{errors.city}</p> : null}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">State</label>
+                  <select
+                    value={values.state}
+                    onChange={(e) => set("state", e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">— Select state —</option>
+                    {INDIAN_STATES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Pincode</label>
+                  <input
+                    className={inputClass}
+                    value={values.pincode}
+                    onChange={(e) => set("pincode", e.target.value)}
+                    placeholder="6 digits"
+                  />
+                  {errors.pincode ? <p className="mt-1 text-xs text-red-600">{errors.pincode}</p> : null}
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Full Address</label>
+                <textarea
+                  name="fullAddress"
+                  rows={3}
+                  value={values.fullAddress}
+                  onChange={(e) => set("fullAddress", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </CardBody>
+          </Card>
+
+        <Card className="min-w-0" padding="lg">
+            <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <Landmark className="h-5 w-5" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <CardTitle className="text-lg font-semibold text-zinc-900">Bank & Payment Details</CardTitle>
+                  <p className="text-sm text-zinc-500">Bank accounts, payment terms, and credit preferences</p>
+                </div>
+                <Button variant="outline" size="sm" className="shrink-0 border-amber-400 text-amber-700 hover:bg-amber-50">
+                  BANK
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-4 pt-0">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Bank Name</label>
+                  <input className={inputClass} value={values.bankName} onChange={(e) => set("bankName", e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Account Number</label>
+                  <input className={inputClass} value={values.accountNumber} onChange={(e) => set("accountNumber", e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">IFSC Code</label>
+                  <input className={inputClass} value={values.ifscCode} onChange={(e) => set("ifscCode", e.target.value.toUpperCase())} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Payment Terms</label>
+                  <select value={values.paymentTerms} onChange={(e) => set("paymentTerms", e.target.value)} className={inputClass}>
+                    {PAYMENT_TERMS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Credit Limit (₹)</label>
+                  <input className={inputClass} value={values.creditLimit} onChange={(e) => set("creditLimit", e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-900">Currency</label>
+                  <select value={values.currency} onChange={(e) => set("currency", e.target.value)} className={inputClass}>
+                    <option value="INR">INR</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+        <Card className="min-w-0" padding="lg">
+            <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <CardTitle className="text-lg font-semibold text-zinc-900">Performance & Catalog</CardTitle>
+                  <p className="text-sm text-zinc-500">Fulfilment KPIs and catalog coverage</p>
+                </div>
+                <Button variant="outline" size="sm" className="shrink-0 border-amber-400 text-amber-700 hover:bg-amber-50">
+                  KPI
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-4 pt-0">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Metal Types Supplied</label>
+                <div className="flex flex-wrap gap-2">
+                  {METAL_TYPES.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => toggleMetal(m)}
+                      className={`rounded-xl px-3 py-1.5 text-sm font-medium ${
+                        values.metalTypes.includes(m)
+                          ? "bg-amber-500 text-white"
+                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-amber-50"
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Item Categories</label>
+                <div className="flex flex-wrap gap-2">
+                  {ITEM_CATEGORIES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleCategory(c)}
+                      className={`rounded-xl px-3 py-1.5 text-sm font-medium ${
+                        values.itemCategories.includes(c)
+                          ? "bg-amber-500 text-white"
+                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-amber-50"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900">On-time Rate (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  className={inputClass}
+                  value={values.onTimeRate}
+                  onChange={(e) => set("onTimeRate", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Lead Time (days)</label>
+                <input className={inputClass} value={values.leadTimeDays} onChange={(e) => set("leadTimeDays", e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Minimum Order Value (₹)</label>
+                <input className={inputClass} value={values.minimumOrderValue} onChange={(e) => set("minimumOrderValue", e.target.value)} />
+              </div>
+              <div className="lg:col-span-4">
+                <label className="mb-1 block text-xs font-medium text-zinc-900">Notes / Comments</label>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  value={values.notes}
+                  onChange={(e) => set("notes", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              </div>
+            </CardBody>
+          </Card>
 
         {/* Sticky footer */}
         <div className="sticky bottom-0 left-0 right-0 flex flex-col gap-3 border-t border-zinc-200 bg-white px-0 py-4 sm:flex-row sm:items-center sm:justify-between">

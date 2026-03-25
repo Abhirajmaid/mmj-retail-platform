@@ -39,7 +39,6 @@ export function DashboardLayout({
       />
       <div className="min-w-0 bg-white lg:pl-[268px]">
         <Navbar
-          brand={brand}
           title={title}
           subtitle={subtitle}
           actions={actions}

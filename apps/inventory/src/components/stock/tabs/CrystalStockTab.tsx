@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Camera, Upload, FileText, Gem, ArrowLeft, ArrowRight } from "lucide-react";
+import { Camera, Upload, FileText, Gem, ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import { Button, Card, CardBody, CardHeader, CardTitle } from "@jewellery-retail/ui";
 import { useCrystalStore } from "@/src/store/stock-store";
 import { useFirmStore } from "@/src/store/firm-store";
@@ -12,6 +12,10 @@ const GENDER_OPTIONS = ["", "Male", "Female"];
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
+
+const selectClass = `${inputClass} appearance-none bg-white pr-10`;
+const selectChevronClass =
+  "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400";
 
 export function CrystalStockTab() {
   const addPending = useCrystalStore((s) => s.addPending);
@@ -125,16 +129,19 @@ export function CrystalStockTab() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Firm</label>
-              <select
-                className={inputClass}
-                value={form.firm}
-                onChange={(e) => update({ firm: e.target.value })}
-              >
-                <option value="">— Select firm —</option>
-                {firms.map((f) => (
-                  <option key={f.id} value={f.id}>{f.shopName}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.firm}
+                  onChange={(e) => update({ firm: e.target.value })}
+                >
+                  <option value="">— Select firm —</option>
+                  {firms.map((f) => (
+                    <option key={f.id} value={f.id}>{f.shopName}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Item ID (Stone)</label>
@@ -142,27 +149,33 @@ export function CrystalStockTab() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Brand / Seller Name</label>
-              <select
-                className={inputClass}
-                value={form.brandSellerName}
-                onChange={(e) => update({ brandSellerName: e.target.value })}
-              >
-                {BRAND_SELLER_OPTIONS.map((opt) => (
-                  <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.brandSellerName}
+                  onChange={(e) => update({ brandSellerName: e.target.value })}
+                >
+                  {BRAND_SELLER_OPTIONS.map((opt) => (
+                    <option key={opt || "__select__"} value={opt}>{opt || "— Select brand —"}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Gender</label>
-              <select
-                className={inputClass}
-                value={form.gender}
-                onChange={(e) => update({ gender: e.target.value })}
-              >
-                {GENDER_OPTIONS.map((opt) => (
-                  <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className={selectClass}
+                  value={form.gender}
+                  onChange={(e) => update({ gender: e.target.value })}
+                >
+                  {GENDER_OPTIONS.map((opt) => (
+                    <option key={opt || "__select__"} value={opt}>{opt || "— Select gender —"}</option>
+                  ))}
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Images / Photos</label>
