@@ -25,38 +25,43 @@ import { formatCurrency, statusColor } from "@jewellery-retail/utils";
 
 export default function ProductsPage() {
   const { data } = useProducts();
+  const products = Array.isArray(data)
+    ? data
+    : Array.isArray((data as { data?: unknown }).data)
+      ? ((data as { data: Product[] }).data ?? [])
+      : [];
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const filteredProducts = useMemo(
     () =>
-      data.filter((product) => {
+      products.filter((product) => {
         const matchesQuery = `${product.name} ${product.sku} ${product.category}`
           .toLowerCase()
           .includes(query.toLowerCase());
         const matchesStatus = statusFilter === "all" || product.status === statusFilter;
         return matchesQuery && matchesStatus;
       }),
-    [data, query, statusFilter]
+    [products, query, statusFilter]
   );
 
   const { totalCount, activeCount, lowStockCount, outOfStockCount } = useMemo(() => {
     let active = 0;
     let low = 0;
     let out = 0;
-    for (const p of data) {
+    for (const p of products) {
       if (p.status === "active") active += 1;
       else if (p.status === "low") low += 1;
       else if (p.status === "out_of_stock") out += 1;
     }
     return {
-      totalCount: data.length,
+      totalCount: products.length,
       activeCount: active,
       lowStockCount: low,
       outOfStockCount: out,
     };
-  }, [data]);
+  }, [products]);
 
   const productTabItems = useMemo(
     () => [
@@ -157,7 +162,7 @@ export default function ProductsPage() {
             {hasActiveFilter ? (
               <>
                 {" "}
-                of <strong>{data.length}</strong>
+                of <strong>{products.length}</strong>
               </>
             ) : null}{" "}
             result{filteredProducts.length !== 1 ? "s" : ""}

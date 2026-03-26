@@ -36,3 +36,9 @@ Only do this if you want to wipe the existing admin and use the web form again (
 - Start Strapi again; it will create a new DB and show the welcome/registration form for the first super admin.
 
 **Warning:** This removes all data in that database, not just the admin user.
+
+## Persistence fix applied in this repo
+
+The SQLite path in `apps/backend/config/database.ts` is now resolved from the backend root (not from `dist`), so admin users and API data persist across backend restarts/rebuilds.
+
+If you previously had data in `apps/backend/dist/.tmp/data.db`, move/copy it to `apps/backend/.tmp/data.db` once, then restart Strapi.

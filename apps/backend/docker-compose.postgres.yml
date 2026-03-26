@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mmj-retail-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jewellery_retail
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+    ports:
+      - "5432:5432"
+    volumes:
+      - mmj_retail_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi -d jewellery_retail"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mmj_retail_postgres_data:

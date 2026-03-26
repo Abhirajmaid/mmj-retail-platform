@@ -9,13 +9,16 @@
     "start": "strapi start",
     "seed": "ts-node src/seed.ts",
     "type-gen": "strapi ts:generate-types",
-    "clean": "rimraf dist .cache .tmp"
+    "clean": "rimraf dist .cache .tmp",
+    "db:up": "docker compose -f docker-compose.postgres.yml up -d",
+    "db:down": "docker compose -f docker-compose.postgres.yml down",
+    "db:logs": "docker compose -f docker-compose.postgres.yml logs -f postgres"
   },
   "dependencies": {
     "@strapi/plugin-graphql": "^5.0.0",
     "@strapi/plugin-users-permissions": "^5.0.0",
     "@strapi/strapi": "^5.0.0",
-    "better-sqlite3": "^12.6.2",
+    "pg": "^8.20.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
@@ -23,7 +26,6 @@
   },
   "devDependencies": {
     "@strapi/typescript-utils": "^5.0.0",
-    "@types/better-sqlite3": "^7.6.8",
     "@types/node": "^20.0.0",
     "esbuild": "^0.27.4",
     "rimraf": "^5.0.0",

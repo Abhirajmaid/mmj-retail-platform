@@ -26,40 +26,41 @@ From the **monorepo root**:
 npm install
 ```
 
-### 3 — SQLite on Windows (native compilation required)
+### 3 — Start PostgreSQL (recommended team setup)
 
-`better-sqlite3` is a native Node.js addon and **must be compiled from source** on Windows.
-
-**Option A — Install Visual Studio Build Tools (recommended for SQLite)**
-
-1. Download [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-2. Select the **"Desktop development with C++"** workload
-3. After installation, rebuild the native module:
+From `apps/backend`:
 
 ```bash
-npm rebuild better-sqlite3
+npm run db:up
 ```
 
-**Option B — Use PostgreSQL instead (no native compilation needed)**
+This starts a local PostgreSQL container (`postgres:16`) with persistent Docker volume storage.
 
-1. Install PostgreSQL and create a database
+To stop it:
+
+```bash
+npm run db:down
+```
+
+### 4 — SQLite on Windows (optional fallback)
+
+The backend is configured for PostgreSQL by default.  
+If you explicitly want SQLite for solo/local work:
+
+1. Install SQLite driver:
+
+```bash
+npm install better-sqlite3
+```
+
 2. Update `.env`:
 
 ```env
-DATABASE_CLIENT=postgres
-DATABASE_HOST=127.0.0.1
-DATABASE_PORT=5432
-DATABASE_NAME=jewellery_retail
-DATABASE_USERNAME=strapi
-DATABASE_PASSWORD=strapi
-DATABASE_SSL=false
+DATABASE_CLIENT=sqlite
+DATABASE_FILENAME=.tmp/data.db
 ```
 
-3. Replace `better-sqlite3` with `pg` in `package.json`:
-
-```bash
-npm uninstall better-sqlite3 && npm install pg
-```
+If `better-sqlite3` fails to build on Windows, install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with **Desktop development with C++**.
 
 ---
 

@@ -1,13 +1,14 @@
 import path from 'path';
 
 export default ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
+  const client = env('DATABASE_CLIENT', 'postgres');
 
   const connections = {
     sqlite: {
       connection: {
         filename: path.join(
           __dirname,
+          '..',
           '..',
           env('DATABASE_FILENAME', '.tmp/data.db')
         ),
