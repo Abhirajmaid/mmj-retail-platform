@@ -32,3 +32,21 @@
 - Wire Create New Customer submit to the customers API and redirect to the new customer profile.
 - Replace placeholder metal rates with live data (store or API).
 - Optional: add “Create New Bill” link on the Invoices page for quick access.
+
+## UI Consistency Update
+
+- Billing dashboard revenue period selector now uses shared `DropdownMenu` from `@jewellery-retail/ui` instead of native `<select>` for consistent dropdown behavior and styling.
+- Pending invoices now uses shared `StatCard` from `@jewellery-retail/ui` (local duplicate card removed).
+- Monthly revenue section was aligned to shared card structure using `CardHeader` + `CardBody` from `@jewellery-retail/ui` so chart containers follow the same layout system as other modules.
+
+## Dashboard Visual Alignment Follow-up
+
+- Revenue period control was restyled to a native chevron select matching the upper metal-rate dropdown interaction and appearance.
+- Monthly revenue chart was updated to visually match inventory’s stock valuation trend style:
+  - Same card title pattern (`CardTitle` + subtitle)
+  - Removed right-side live badge
+  - Removed extra bar category gap for wider bars
+  - Updated bar fill to amber (`#f59e0b`)
+- Revenue period select field now uses the same stock add field styling pattern (gray border, rounded-lg, amber focus ring/border, min 44px height) for consistency with `apps/inventory/app/(back-office)/stock/add/page.tsx`.
+- Metal-rate card dropdowns (`10 gm`, `24k`) now also use stock-add-style field treatment (light field, gray border, rounded corners, amber focus ring/border) for consistent dropdown styling across billing dashboard controls.
+- Pending invoices card now uses shared `KpiCard` styling (same icon tile, typography, and footer-dot layout as inventory KPI cards) to match inventory dashboard card design.

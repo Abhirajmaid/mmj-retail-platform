@@ -5,59 +5,61 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronDown, FileText, Save, UserRound } from "lucide-react";
 
-import type { Invoice } from "@jewellery-retail/types";
-import { useInvoices } from "@jewellery-retail/hooks";
+import type { Payment } from "@jewellery-retail/types";
+import { usePayments } from "@jewellery-retail/hooks";
 import { Button, Card, CardBody, CardHeader, CardTitle, Loader, PageHeader } from "@jewellery-retail/ui";
 
 const emptyForm = {
   customerName: "",
   amount: "",
-  dueDate: "",
-  status: "draft" as Invoice["status"],
+  method: "upi" as Payment["method"],
+  status: "pending" as Payment["status"],
+  invoiceNumber: "",
 };
 
 const inputClass =
   "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
 const selectClass = `${inputClass} appearance-none bg-white pr-10`;
 
-export default function EditInvoicePage() {
+export default function EditPaymentPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
-  const { data: invoices, isLoading } = useInvoices();
-  const invoice = invoices.find((inv) => inv.id === id);
+  const { data: payments, isLoading } = usePayments();
+  const payment = payments.find((p) => p.id === id);
 
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
-    if (!invoice) return;
+    if (!payment) return;
     setForm({
-      customerName: invoice.customerName ?? "",
-      amount: String(invoice.amount ?? ""),
-      dueDate: invoice.dueDate ?? "",
-      status: invoice.status ?? "draft",
+      customerName: payment.customerName ?? "",
+      amount: String(payment.amount ?? ""),
+      method: payment.method ?? "upi",
+      status: payment.status ?? "pending",
+      invoiceNumber: payment.invoiceNumber ?? "",
     });
-  }, [invoice]);
+  }, [payment]);
 
-  if (isLoading || !invoice) {
-    if (!isLoading && !invoice) {
+  if (isLoading || !payment) {
+    if (!isLoading && !payment) {
       return (
         <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-8 text-zinc-700">
-          <p className="font-medium">Invoice not found</p>
-          <Link href="/invoices" className="text-sm text-[hsl(var(--primary))] hover:underline">
-            Back to invoices
+          <p className="font-medium">Payment not found</p>
+          <Link href="/payments" className="text-sm text-[hsl(var(--primary))] hover:underline">
+            Back to payments
           </Link>
         </div>
       );
     }
-    return <Loader label="Loading invoice…" size="lg" />;
+    return <Loader label="Loading payment…" size="lg" />;
   }
 
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
       <PageHeader
-        title="Edit Invoice"
-        description="Update invoice details with stock-style form layout."
+        title="Edit Payment"
+        description="Update payment details with stock-style form layout."
       />
 
       <Card className="min-w-0" padding="lg">
@@ -66,12 +68,12 @@ export default function EditInvoicePage() {
             <UserRound className="h-5 w-5" />
           </div>
           <div className="min-w-0 space-y-1">
-            <CardTitle className="text-lg font-semibold text-zinc-900">Customer & Invoice Details</CardTitle>
-            <p className="text-sm text-zinc-500">Edit customer, amount, due date and status</p>
+            <CardTitle className="text-lg font-semibold text-zinc-900">Customer & Payment Details</CardTitle>
+            <p className="text-sm text-zinc-500">Edit customer, amount, method, status and invoice number</p>
           </div>
         </CardHeader>
         <CardBody className="space-y-4 pt-0">
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-900">Customer name</label>
               <input
@@ -82,35 +84,48 @@ export default function EditInvoicePage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-900">Invoice amount</label>
+              <label className="mb-1 block text-xs font-medium text-zinc-900">Amount</label>
               <input
                 type="number"
                 value={form.amount}
                 onChange={(e) => setForm((c) => ({ ...c, amount: e.target.value }))}
                 className={inputClass}
-                placeholder="Invoice amount"
+                placeholder="Amount"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-900">Due date</label>
+              <label className="mb-1 block text-xs font-medium text-zinc-900">Invoice number</label>
               <input
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => setForm((c) => ({ ...c, dueDate: e.target.value }))}
+                value={form.invoiceNumber}
+                onChange={(e) => setForm((c) => ({ ...c, invoiceNumber: e.target.value }))}
                 className={inputClass}
+                placeholder="Invoice number"
               />
+            </div>
+            <div className="relative">
+              <label className="mb-1 block text-xs font-medium text-zinc-900">Method</label>
+              <select
+                value={form.method}
+                onChange={(e) => setForm((c) => ({ ...c, method: e.target.value as Payment["method"] }))}
+                className={selectClass}
+              >
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+                <option value="bank">Bank</option>
+                <option value="cash">Cash</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-[38px] h-4 w-4 text-zinc-400" />
             </div>
             <div className="relative">
               <label className="mb-1 block text-xs font-medium text-zinc-900">Status</label>
               <select
                 value={form.status}
-                onChange={(e) => setForm((c) => ({ ...c, status: e.target.value as Invoice["status"] }))}
+                onChange={(e) => setForm((c) => ({ ...c, status: e.target.value as Payment["status"] }))}
                 className={selectClass}
               >
-                <option value="draft">Draft</option>
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
-                <option value="overdue">Overdue</option>
+                <option value="failed">Failed</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-[38px] h-4 w-4 text-zinc-400" />
             </div>
@@ -125,7 +140,7 @@ export default function EditInvoicePage() {
           </div>
           <div className="min-w-0 space-y-1">
             <CardTitle className="text-lg font-semibold text-zinc-900">Preview</CardTitle>
-            <p className="text-sm text-zinc-500">Quick summary of updated invoice values</p>
+            <p className="text-sm text-zinc-500">Quick summary of updated payment values</p>
           </div>
         </CardHeader>
         <CardBody className="pt-0">
@@ -133,7 +148,8 @@ export default function EditInvoicePage() {
             <div className="grid gap-3 text-sm sm:grid-cols-2">
               <p className="text-zinc-700"><span className="font-medium text-zinc-900">Customer:</span> {form.customerName || "—"}</p>
               <p className="text-zinc-700"><span className="font-medium text-zinc-900">Amount:</span> {form.amount || "0"}</p>
-              <p className="text-zinc-700"><span className="font-medium text-zinc-900">Due date:</span> {form.dueDate || "—"}</p>
+              <p className="text-zinc-700"><span className="font-medium text-zinc-900">Invoice:</span> {form.invoiceNumber || "—"}</p>
+              <p className="text-zinc-700"><span className="font-medium text-zinc-900">Method:</span> {form.method.toUpperCase()}</p>
               <p className="text-zinc-700"><span className="font-medium text-zinc-900">Status:</span> {form.status}</p>
             </div>
           </div>
@@ -141,7 +157,7 @@ export default function EditInvoicePage() {
       </Card>
 
       <div className="flex flex-col gap-3 border-t border-zinc-100 bg-white pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <Link href={`/invoices/${id}`} className="order-2 sm:order-1">
+        <Link href={`/payments/${id}`} className="order-2 sm:order-1">
           <Button type="button" variant="ghost" className="min-h-[44px] w-full sm:min-h-9 sm:w-auto">
             Cancel
           </Button>
@@ -150,10 +166,7 @@ export default function EditInvoicePage() {
           <Button
             type="button"
             className="min-h-[44px] w-full bg-amber-500 text-white hover:bg-amber-600 sm:min-h-9 sm:w-auto"
-            onClick={() => {
-              // TODO: submit to API
-              router.push(`/invoices/${id}`);
-            }}
+            onClick={() => router.push(`/payments/${id}`)}
           >
             <Save className="mr-2 h-4 w-4" />
             Save changes

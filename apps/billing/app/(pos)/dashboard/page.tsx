@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Receipt } from "lucide-react";
+import { ChevronDown, Receipt } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -19,13 +19,19 @@ import { MetalRatesCard } from "@/src/components/MetalRatesCard";
 import { defaultMetalRates } from "@/src/store/metal-rates";
 import { useBillingDashboard } from "@jewellery-retail/hooks";
 import {
-  Badge,
   Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  KpiCard,
   Loader,
 } from "@jewellery-retail/ui";
 import { formatCompactNumber, formatCurrency } from "@jewellery-retail/utils";
 
 type RevenuePeriod = "Today" | "Monthly" | "Total";
+
+const stockLikeSelectClass =
+  "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px] appearance-none bg-white pr-10";
 
 const defaultDashboardData = {
   totalRevenue: 0,
@@ -98,19 +104,23 @@ export default function BillingDashboardPage() {
           <MetalRatesCard rates={defaultMetalRates} />
 
           <Card className="overflow-hidden p-5 transition-all" padding="none">
-            <div className="flex items-start justify-between gap-4 p-5">
+            <CardBody className="p-5">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-medium text-zinc-500">Revenue</p>
-                  <select
-                    value={revenuePeriod}
-                    onChange={(e) => setRevenuePeriod(e.target.value as RevenuePeriod)}
-                    className="h-9 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-0"
-                  >
-                    <option value="Today">Today</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Total">Total</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={revenuePeriod}
+                      onChange={(e) => setRevenuePeriod(e.target.value as RevenuePeriod)}
+                      className={`${stockLikeSelectClass} min-w-[126px] font-medium text-zinc-700`}
+                      aria-label="Revenue period"
+                    >
+                      <option value="Today">Today</option>
+                      <option value="Monthly">Monthly</option>
+                      <option value="Total">Total</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  </div>
                 </div>
                 <p
                   key={revenuePeriod}
@@ -120,15 +130,17 @@ export default function BillingDashboardPage() {
                 </p>
                 <p className="mt-2 text-sm text-emerald-600">{revenueTrend}</p>
               </div>
-            </div>
+            </CardBody>
           </Card>
 
-          <StatCard
+          <KpiCard
             title="Pending invoices"
-            value={String(safe.pendingInvoices)}
-            description="Awaiting payment follow-up"
-            trend="-2 this week"
+            value={safe.pendingInvoices}
+            footer="Awaiting payment follow-up"
             icon={Receipt}
+            color="bg-amber-50"
+            borderColor="border-amber-200"
+            iconColor="text-amber-600"
           />
         </div>
 
@@ -158,69 +170,28 @@ export default function BillingDashboardPage() {
       </div>
 
       <Card className="p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-950">Monthly Revenue</h2>
-            <p className="text-sm text-zinc-500">Six-month revenue trend.</p>
+        <CardHeader className="mb-0 space-y-1 pb-0">
+          <CardTitle>Monthly Revenue</CardTitle>
+          <p className="text-sm text-zinc-500">Six-month revenue trend.</p>
+        </CardHeader>
+        <CardBody className="pt-5">
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={safe.monthlyRevenueSeries}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => formatCompactNumber(value)}
+                />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="#f59e0b" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <Badge variant="info">{isLoading ? "Refreshing" : "Live view"}</Badge>
-        </div>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={safe.monthlyRevenueSeries} barCategoryGap="40%">
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => formatCompactNumber(value)}
-              />
-              <Tooltip formatter={(value: number) => formatCurrency(value)} />
-              <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="#ff7a45" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        </CardBody>
       </Card>
     </div>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-  description,
-  trend,
-  icon: Icon,
-}: {
-  title: string;
-  value: string;
-  description?: string;
-  trend?: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Card className="space-y-5 overflow-hidden border-zinc-100 bg-white p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-zinc-500">{title}</p>
-          <p className="text-[30px] font-semibold leading-none text-zinc-950">{value}</p>
-        </div>
-        {Icon ? (
-          <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-3 text-[var(--app-accent,#f97316)] shadow-[0_12px_24px_-20px_rgba(15,23,42,0.35)]">
-            <Icon className="h-5 w-5" />
-          </div>
-        ) : null}
-      </div>
-      {(description || trend) && (
-        <div className="flex items-end justify-between gap-3 text-sm">
-          <span className="max-w-[15rem] text-zinc-500">{description}</span>
-          {trend ? (
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-600">
-              {trend}
-            </span>
-          ) : null}
-        </div>
-      )}
-    </Card>
   );
 }

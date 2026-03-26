@@ -6,8 +6,8 @@ import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { ArrowLeft, Download, FileText, Pencil, Receipt, Trash2, UserRound } from "lucide-react";
 
-import type { Invoice } from "@jewellery-retail/types";
-import { useInvoices } from "@jewellery-retail/hooks";
+import type { Payment } from "@jewellery-retail/types";
+import { usePayments } from "@jewellery-retail/hooks";
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Loader, PageHeader } from "@jewellery-retail/ui";
 import { dateFormat, formatCurrency, statusColor } from "@jewellery-retail/utils";
 
@@ -23,88 +23,88 @@ function DetailField({ label, value }: { label: string; value: string | number }
   );
 }
 
-function InvoicePrintContent({ invoice }: { invoice: Invoice }) {
+function PaymentPrintContent({ payment }: { payment: Payment }) {
   return (
     <div className="space-y-4 bg-white p-6 text-black">
-      <h1 className="text-2xl font-semibold">Invoice {invoice.invoiceNumber}</h1>
+      <h1 className="text-2xl font-semibold">Payment {payment.reference}</h1>
       <div className="space-y-3">
-        <DetailField label="Customer" value={invoice.customerName} />
-        <DetailField label="Issued" value={dateFormat(invoice.issuedAt)} />
-        <DetailField label="Due date" value={dateFormat(invoice.dueDate)} />
-        <DetailField label="Payment method" value={invoice.paymentMethod} />
-        <DetailField label="Items" value={invoice.items} />
-        <DetailField label="Amount" value={formatCurrency(invoice.amount)} />
-        <DetailField label="Status" value={invoice.status} />
+        <DetailField label="Reference" value={payment.reference} />
+        <DetailField label="Customer" value={payment.customerName} />
+        <DetailField label="Invoice" value={payment.invoiceNumber} />
+        <DetailField label="Method" value={payment.method.toUpperCase()} />
+        <DetailField label="Status" value={payment.status} />
+        <DetailField label="Date" value={dateFormat(payment.createdAt)} />
+        <DetailField label="Amount" value={formatCurrency(payment.amount)} />
       </div>
     </div>
   );
 }
 
-export default function InvoiceDetailPage() {
+export default function PaymentDetailPage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
-  const { data: invoices, isLoading, error } = useInvoices();
-  const invoice = invoices.find((inv) => inv.id === id);
+  const { data: payments, isLoading, error } = usePayments();
+  const payment = payments.find((p) => p.id === id);
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: invoice ? `Invoice-${invoice.invoiceNumber}` : "Invoice",
+    documentTitle: payment ? `Payment-${payment.reference}` : "Payment",
     pageStyle: `
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .invoice-print-only { padding: 24px; }
+      .payment-print-only { padding: 24px; }
     `,
   });
 
   if (error) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-red-800">
-        <p className="font-medium">Failed to load invoice</p>
+        <p className="font-medium">Failed to load payment</p>
         <p className="text-sm">{error}</p>
       </div>
     );
   }
 
-  if (isLoading || !invoice) {
-    if (!isLoading && !invoice) {
+  if (isLoading || !payment) {
+    if (!isLoading && !payment) {
       return (
         <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-8 text-zinc-700">
-          <p className="font-medium">Invoice not found</p>
-          <Link href="/invoices" className="text-sm text-[hsl(var(--primary))] hover:underline">
-            Back to invoices
+          <p className="font-medium">Payment not found</p>
+          <Link href="/payments" className="text-sm text-[hsl(var(--primary))] hover:underline">
+            Back to payments
           </Link>
         </div>
       );
     }
-    return <Loader label="Loading invoice…" size="lg" />;
+    return <Loader label="Loading payment…" size="lg" />;
   }
 
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
       <PageHeader
-        title={invoice.invoiceNumber}
-        description="Invoice details in stock-add style layout."
+        title={payment.reference}
+        description="Payment details in stock-add style layout."
         actions={
           <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
-            <Link href="/invoices">
+            <Link href="/payments">
               <Button type="button" variant="outline" className="min-h-[44px] border-zinc-300 bg-zinc-100 px-6 text-zinc-900 hover:bg-zinc-200 sm:min-h-9">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
             </Link>
-            <Link href={`/invoices/${id}/edit`}>
+            <Link href={`/payments/${id}/edit`}>
               <Button type="button" variant="outline" className="min-h-[44px] border-amber-300 bg-amber-50 px-6 text-amber-700 hover:bg-amber-100 sm:min-h-9">
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Button>
             </Link>
-            <Link href={`/invoices?deleted=${id}`}>
+            <Link href={`/payments?deleted=${id}`}>
               <Button type="button" variant="outline" className="min-h-[44px] border-red-300 bg-red-50 px-6 text-red-600 hover:bg-red-100 sm:min-h-9">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </Button>
             </Link>
-            <Badge variant={statusColor(invoice.status)}>{invoice.status}</Badge>
+            <Badge variant={statusColor(payment.status)}>{payment.status}</Badge>
           </div>
         }
       />
@@ -115,16 +115,16 @@ export default function InvoiceDetailPage() {
             <FileText className="h-5 w-5" />
           </div>
           <div className="min-w-0 space-y-1">
-            <CardTitle className="text-lg font-semibold text-zinc-900">Invoice Header Information</CardTitle>
-            <p className="text-sm text-zinc-500">Core invoice metadata and schedule details</p>
+            <CardTitle className="text-lg font-semibold text-zinc-900">Payment Header Information</CardTitle>
+            <p className="text-sm text-zinc-500">Core payment metadata and timeline details</p>
           </div>
         </CardHeader>
         <CardBody className="space-y-4 pt-0">
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <DetailField label="Invoice number" value={invoice.invoiceNumber} />
-            <DetailField label="Issued date" value={dateFormat(invoice.issuedAt)} />
-            <DetailField label="Due date" value={dateFormat(invoice.dueDate)} />
-            <DetailField label="Payment method" value={invoice.paymentMethod} />
+            <DetailField label="Reference" value={payment.reference} />
+            <DetailField label="Invoice number" value={payment.invoiceNumber} />
+            <DetailField label="Method" value={payment.method.toUpperCase()} />
+            <DetailField label="Date" value={dateFormat(payment.createdAt)} />
           </div>
         </CardBody>
       </Card>
@@ -135,16 +135,16 @@ export default function InvoiceDetailPage() {
             <UserRound className="h-5 w-5" />
           </div>
           <div className="min-w-0 space-y-1">
-            <CardTitle className="text-lg font-semibold text-zinc-900">Customer & Billing Summary</CardTitle>
-            <p className="text-sm text-zinc-500">Customer, items count, and final amount snapshot</p>
+            <CardTitle className="text-lg font-semibold text-zinc-900">Customer & Amount Summary</CardTitle>
+            <p className="text-sm text-zinc-500">Customer, status and payment value snapshot</p>
           </div>
         </CardHeader>
         <CardBody className="space-y-4 pt-0">
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <DetailField label="Customer name" value={invoice.customerName} />
-            <DetailField label="Items" value={invoice.items} />
-            <DetailField label="Status" value={invoice.status} />
-            <DetailField label="Amount" value={formatCurrency(invoice.amount)} />
+            <DetailField label="Customer name" value={payment.customerName} />
+            <DetailField label="Status" value={payment.status} />
+            <DetailField label="Method" value={payment.method.toUpperCase()} />
+            <DetailField label="Amount" value={formatCurrency(payment.amount)} />
           </div>
           <div className="rounded-lg border border-zinc-200 bg-amber-50/30 p-4">
             <div className="flex items-center gap-3">
@@ -152,8 +152,8 @@ export default function InvoiceDetailPage() {
                 <Receipt className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total invoice amount</p>
-                <p className="text-2xl font-semibold text-zinc-900">{formatCurrency(invoice.amount)}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total payment amount</p>
+                <p className="text-2xl font-semibold text-zinc-900">{formatCurrency(payment.amount)}</p>
               </div>
             </div>
           </div>
@@ -174,8 +174,8 @@ export default function InvoiceDetailPage() {
       </div>
 
       <div className="sr-only" aria-hidden>
-        <div ref={printRef} className="invoice-print-only">
-          <InvoicePrintContent invoice={invoice} />
+        <div ref={printRef} className="payment-print-only">
+          <PaymentPrintContent payment={payment} />
         </div>
       </div>
     </div>

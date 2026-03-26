@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Download, Pencil, Plus } from "lucide-react";
+import { CircleCheck, Clock3, Download, Eye, FileText, Filter, Plus, Search } from "lucide-react";
 
 import type { Invoice } from "@jewellery-retail/types";
 import { useInvoices } from "@jewellery-retail/hooks";
@@ -11,7 +11,7 @@ import {
   Badge,
   Button,
   Input,
-  Modal,
+  KpiCard,
   PageHeader,
   Table,
   TableBody,
@@ -21,67 +21,193 @@ import {
   TableRow,
 } from "@jewellery-retail/ui";
 import { dateFormat, formatCurrency, statusColor } from "@jewellery-retail/utils";
-import { DeleteConfirmPopover } from "@/src/components/DeleteConfirmPopover";
-
-const initialForm = {
-  customerName: "",
-  amount: "",
-  dueDate: "",
-};
 
 export default function InvoicesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data } = useInvoices();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices] = useState<Invoice[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(() => {
     const id = searchParams.get("deleted");
     return id ? new Set([id]) : new Set();
   });
-  const [form, setForm] = useState(initialForm);
-  const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [invoiceFilter, setInvoiceFilter] = useState<"All" | "Paid" | "Pending" | "Overdue">("All");
 
   const mergedInvoices = useMemo(
     () => [...invoices, ...data].filter((inv) => !deletedIds.has(inv.id)),
     [data, invoices, deletedIds]
   );
 
-  const filteredInvoices = useMemo(
+  const normalizedStatus = (status: string) => status.toLowerCase().replace("_", " ");
+  const paidCount = useMemo(
+    () => mergedInvoices.filter((invoice) => normalizedStatus(invoice.status).includes("paid")).length,
+    [mergedInvoices]
+  );
+  const pendingCount = useMemo(
     () =>
-      mergedInvoices.filter(
-        (invoice) =>
-          invoice.invoiceNumber.toLowerCase().includes(query.toLowerCase()) ||
-          invoice.customerName.toLowerCase().includes(query.toLowerCase()) ||
-          formatCurrency(invoice.amount).toLowerCase().includes(query.toLowerCase()) ||
-          invoice.status.toLowerCase().includes(query.toLowerCase())
-      ),
-    [mergedInvoices, query]
+      mergedInvoices.filter((invoice) => {
+        const status = normalizedStatus(invoice.status);
+        return status.includes("pending") || status.includes("unpaid");
+      }).length,
+    [mergedInvoices]
+  );
+  const overdueCount = useMemo(
+    () => mergedInvoices.filter((invoice) => normalizedStatus(invoice.status).includes("overdue")).length,
+    [mergedInvoices]
   );
 
-  const handleDeleteInvoice = (invoice: Invoice) => {
-    setDeletedIds((prev) => new Set(prev).add(invoice.id));
-    setInvoices((prev) => prev.filter((i) => i.id !== invoice.id));
-  };
+  const tabItems = useMemo(
+    () => [
+      { key: "All" as const, label: "All", count: mergedInvoices.length },
+      { key: "Paid" as const, label: "Paid", count: paidCount },
+      { key: "Pending" as const, label: "Pending", count: pendingCount },
+      { key: "Overdue" as const, label: "Overdue", count: overdueCount },
+    ],
+    [mergedInvoices.length, paidCount, pendingCount, overdueCount]
+  );
+
+  const filteredInvoices = useMemo(() => {
+    return mergedInvoices.filter((invoice) => {
+      const status = normalizedStatus(invoice.status);
+      if (invoiceFilter === "Paid" && !status.includes("paid")) return false;
+      if (invoiceFilter === "Pending" && !(status.includes("pending") || status.includes("unpaid"))) return false;
+      if (invoiceFilter === "Overdue" && !status.includes("overdue")) return false;
+
+      if (!query.trim()) return true;
+      const q = query.toLowerCase();
+      return (
+        invoice.invoiceNumber.toLowerCase().includes(q) ||
+        invoice.customerName.toLowerCase().includes(q) ||
+        formatCurrency(invoice.amount).toLowerCase().includes(q) ||
+        status.includes(q)
+      );
+    });
+  }, [mergedInvoices, invoiceFilter, query]);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       <PageHeader
         title="Invoices"
         description="Create, monitor, and download customer invoices across the billing workspace. Click a row to open the invoice."
         actions={
-          <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => setIsOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create invoice
-          </Button>
+          <div className="flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3">
+            <Button variant="primary" asChild>
+              <Link href="/invoices/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create invoice
+              </Link>
+            </Button>
+          </div>
         }
       />
 
-      <Input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search by invoice number, customer, amount, or status"
-      />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <KpiCard
+          title="Total Invoices"
+          value={mergedInvoices.length}
+          footer={`${mergedInvoices.length} ${mergedInvoices.length === 1 ? "invoice" : "invoices"}`}
+          icon={FileText}
+          color="bg-amber-50"
+          borderColor="border-amber-200"
+          iconColor="text-amber-600"
+        />
+        <KpiCard
+          title="Paid Invoices"
+          value={paidCount}
+          footer={`${paidCount} ${paidCount === 1 ? "invoice" : "invoices"}`}
+          icon={CircleCheck}
+          color="bg-emerald-50"
+          borderColor="border-emerald-200"
+          iconColor="text-emerald-600"
+        />
+        <KpiCard
+          title="Pending Invoices"
+          value={pendingCount}
+          footer={`${pendingCount} ${pendingCount === 1 ? "invoice" : "invoices"}`}
+          icon={Clock3}
+          color="bg-blue-50"
+          borderColor="border-blue-200"
+          iconColor="text-blue-600"
+        />
+        <KpiCard
+          title="Overdue Invoices"
+          value={overdueCount}
+          footer={`${overdueCount} ${overdueCount === 1 ? "invoice" : "invoices"}`}
+          icon={Clock3}
+          color="bg-yellow-50"
+          borderColor="border-yellow-200"
+          iconColor="text-yellow-600"
+        />
+      </div>
+
+      <div className="rounded-xl bg-white px-4 py-3 shadow-md sm:px-4 sm:py-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {tabItems.map(({ key, label, count }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setInvoiceFilter(key)}
+                className={`flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
+                  invoiceFilter === key
+                    ? "bg-amber-500 text-white shadow-lg"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800"
+                }`}
+              >
+                {label}
+                <span className="ml-1.5">{count}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-0 flex-1 sm:w-64">
+              <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Input
+                type="search"
+                placeholder="Search by invoice number..."
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
+              />
+            </div>
+
+            <button
+              type="button"
+              title="Add"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-amber-500 shadow-md hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+              onClick={() => router.push("/invoices/new")}
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+
+            <button
+              type="button"
+              title="Filter"
+              className="flex h-10 w-10 shrink-0 items-center shadow-md justify-center rounded-full border border-zinc-200 text-zinc-600 bg-white hover:bg-zinc-50 transition-colors"
+            >
+              <Filter className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              title="Column visibility"
+              className="flex h-10 w-10 shrink-0 items-center shadow-md justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 transition-colors"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              className="flex h-10 shrink-0 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
 
       <Table>
         <TableHead>
@@ -92,7 +218,6 @@ export default function InvoicesPage() {
             <TableHeader>Issued</TableHeader>
             <TableHeader>Due</TableHeader>
             <TableHeader className="text-right">Amount</TableHeader>
-            <TableHeader className="text-right">Action</TableHeader>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -112,81 +237,10 @@ export default function InvoicesPage() {
               <TableCell className="text-right font-medium text-zinc-950">
                 {formatCurrency(invoice.amount)}
               </TableCell>
-              <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-end gap-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-950" asChild>
-                    <Link href={`/invoices/${invoice.id}/edit`} aria-label="Edit invoice">
-                      <Pencil className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <DeleteConfirmPopover onConfirm={() => handleDeleteInvoice(invoice)} />
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500" asChild>
-                    <a href={invoice.downloadUrl ?? "#"} download aria-label="Download">
-                      <Download className="h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Create invoice" size="lg">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input
-            label="Customer name"
-            value={form.customerName}
-            onChange={(event) => setForm((current) => ({ ...current, customerName: event.target.value }))}
-          />
-          <Input
-            label="Invoice amount"
-            type="number"
-            value={form.amount}
-            onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
-          />
-          <Input
-            label="Due date"
-            type="date"
-            value={form.dueDate}
-            onChange={(event) => setForm((current) => ({ ...current, dueDate: event.target.value }))}
-          />
-        </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            className="bg-amber-500 hover:bg-amber-600"
-            onClick={() => {
-              if (!form.customerName || !form.amount || !form.dueDate) {
-                return;
-              }
-
-              setInvoices((current) => [
-                {
-                  id: crypto.randomUUID(),
-                  invoiceNumber: `MMJ-${new Date().getTime().toString().slice(-4)}`,
-                  customerId: "draft-customer",
-                  customerName: form.customerName,
-                  amount: Number(form.amount),
-                  status: "draft",
-                  issuedAt: new Date().toISOString(),
-                  dueDate: form.dueDate,
-                  paymentMethod: "Manual",
-                  items: 1,
-                  downloadUrl: "#",
-                },
-                ...current,
-              ]);
-              setForm(initialForm);
-              setIsOpen(false);
-            }}
-          >
-            Save invoice
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 }

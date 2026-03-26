@@ -20,3 +20,10 @@ Delete is in-memory only (no API): list pages keep a `deletedIds` set and filter
 - `apps/billing/app/(pos)/customers/[id]/edit/page.tsx` — New: edit form (same as new customer).
 - `apps/billing/app/(pos)/invoices/[id]/page.tsx` — Edit link, Delete with redirect to list with `?deleted=`.
 - `apps/billing/app/(pos)/invoices/[id]/edit/page.tsx` — New: edit form (customer, amount, due date, status).
+
+## Follow-up UI Alignment
+
+- Invoices page top bar was aligned with stock page header layout:
+  - page container now uses `min-w-0 space-y-4 sm:space-y-6`
+  - `PageHeader` actions now use the same wrapper structure (`flex min-h-[44px] flex-wrap items-center gap-2 sm:gap-3`)
+  - `Create invoice` action now uses `Button` `variant="primary"` like stock page header actions.

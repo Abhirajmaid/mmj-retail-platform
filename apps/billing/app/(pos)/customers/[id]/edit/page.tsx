@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { FileText, Save, UserRound } from "lucide-react";
 
 import { useCustomers } from "@jewellery-retail/hooks";
-import { Button, Card, Input, Loader, PageHeader } from "@jewellery-retail/ui";
+import { Button, Card, CardBody, CardHeader, CardTitle, Loader, PageHeader } from "@jewellery-retail/ui";
 
 const emptyForm = {
   firstName: "",
@@ -25,6 +26,9 @@ const emptyForm = {
   aadhaar: "",
   type: "",
 };
+const inputClass =
+  "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
+const selectClass = `${inputClass} appearance-none bg-white`;
 
 export default function EditCustomerPage() {
   const params = useParams();
@@ -77,79 +81,77 @@ export default function EditCustomerPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       <PageHeader
         title="Edit Customer"
-        description="Update customer details. Same fields as creation."
+        description="Update customer details with stock-style form layout."
       />
 
-      <Card className="p-6" padding="none">
-        <div className="border-b border-zinc-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-zinc-950">
-            {form.firstName || form.lastName
-              ? [form.title, form.firstName, form.lastName].filter(Boolean).join(" ")
-              : "Customer details"}
-          </h2>
-        </div>
-
-        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
-          <Input label="First name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} />
-          <Input label="Last name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} />
-          <Input label="Mobile number" value={form.mobile} onChange={(e) => update("mobile", e.target.value)} />
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-zinc-700">Title</label>
-            <select
-              value={form.title}
-              onChange={(e) => update("title", e.target.value)}
-              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            >
-              <option value="Mr">Mr</option>
-              <option value="Mrs">Mrs</option>
-            </select>
+      <Card className="min-w-0" padding="lg">
+        <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+            <UserRound className="h-5 w-5" />
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-zinc-700" htmlFor="gender-select">Gender</label>
-            <select
-              id="gender-select"
-              value={form.gender}
-              onChange={(e) => update("gender", e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+          <div className="min-w-0 space-y-1">
+            <CardTitle className="text-lg font-semibold text-zinc-900">Customer Basic Details</CardTitle>
+            <p className="text-sm text-zinc-500">Edit customer identity and contact details</p>
           </div>
-          <Input label="DOB" type="date" value={form.dateOfBirth} onChange={(e) => update("dateOfBirth", e.target.value)} />
-          <Input label="Address" value={form.address} onChange={(e) => update("address", e.target.value)} />
-          <Input label="Email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} />
+        </CardHeader>
+        <CardBody className="space-y-4 pt-0">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">First name</label><input className={inputClass} value={form.firstName} onChange={(e) => update("firstName", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Last name</label><input className={inputClass} value={form.lastName} onChange={(e) => update("lastName", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Mobile number</label><input className={inputClass} value={form.mobile} onChange={(e) => update("mobile", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Title</label><select className={selectClass} value={form.title} onChange={(e) => update("title", e.target.value)}><option value="Mr">Mr</option><option value="Mrs">Mrs</option></select></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Gender</label><select className={selectClass} value={form.gender} onChange={(e) => update("gender", e.target.value)}><option value="Male">Male</option><option value="Female">Female</option></select></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">DOB</label><input type="date" className={inputClass} value={form.dateOfBirth} onChange={(e) => update("dateOfBirth", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Email</label><input type="email" className={inputClass} value={form.email} onChange={(e) => update("email", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Address</label><input className={inputClass} value={form.address} onChange={(e) => update("address", e.target.value)} /></div>
+          </div>
+        </CardBody>
+      </Card>
 
-          <Input label="City" value={form.city} onChange={(e) => update("city", e.target.value)} />
-          <Input label="State" value={form.state} onChange={(e) => update("state", e.target.value)} />
-          <Input label="Pin" value={form.pin} onChange={(e) => update("pin", e.target.value)} />
-          <Input label="Country" value={form.country} onChange={(e) => update("country", e.target.value)} />
+      <Card className="min-w-0" padding="lg">
+        <CardHeader className="flex flex-row items-start gap-3 border-b border-zinc-100 pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <CardTitle className="text-lg font-semibold text-zinc-900">Additional Information</CardTitle>
+            <p className="text-sm text-zinc-500">Location and compliance details</p>
+          </div>
+        </CardHeader>
+        <CardBody className="space-y-4 pt-0">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">City</label><input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">State</label><input className={inputClass} value={form.state} onChange={(e) => update("state", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Pin</label><input className={inputClass} value={form.pin} onChange={(e) => update("pin", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Country</label><input className={inputClass} value={form.country} onChange={(e) => update("country", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">GST</label><input className={inputClass} value={form.gst} onChange={(e) => update("gst", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">PAN</label><input className={inputClass} value={form.pan} onChange={(e) => update("pan", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Aadhaar</label><input className={inputClass} value={form.aadhaar} onChange={(e) => update("aadhaar", e.target.value)} /></div>
+            <div><label className="mb-1 block text-xs font-medium text-zinc-900">Type</label><input className={inputClass} value={form.type} onChange={(e) => update("type", e.target.value)} /></div>
+          </div>
+        </CardBody>
+      </Card>
 
-          <Input label="GST" value={form.gst} onChange={(e) => update("gst", e.target.value)} />
-          <Input label="PAN" value={form.pan} onChange={(e) => update("pan", e.target.value)} />
-          <Input label="Aadhaar" value={form.aadhaar} onChange={(e) => update("aadhaar", e.target.value)} />
-          <Input label="Type" value={form.type} onChange={(e) => update("type", e.target.value)} />
-        </div>
-
-        <div className="flex justify-end gap-3 border-t border-zinc-100 p-6">
-          <Button variant="outline" asChild>
-            <Link href={`/customers/${id}`}>Cancel</Link>
+      <div className="flex flex-col gap-3 border-t border-zinc-100 bg-white pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <Link href={`/customers/${id}`} className="order-2 sm:order-1">
+          <Button type="button" variant="ghost" className="min-h-[44px] w-full sm:min-h-9 sm:w-auto">
+            Cancel
           </Button>
+        </Link>
+        <div className="order-1 flex justify-end sm:order-2">
           <Button
-            className="bg-amber-500 hover:bg-amber-600"
-            onClick={() => {
-              // TODO: submit to API
-              router.push(`/customers/${id}`);
-            }}
+            type="button"
+            className="min-h-[44px] w-full bg-amber-500 text-white hover:bg-amber-600 sm:min-h-9 sm:w-auto"
+            onClick={() => router.push(`/customers/${id}`)}
           >
+            <Save className="mr-2 h-4 w-4" />
             Save changes
           </Button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

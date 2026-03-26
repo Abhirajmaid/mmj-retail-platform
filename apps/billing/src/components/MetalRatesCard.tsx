@@ -19,6 +19,9 @@ function formatGmLabel(gm: number) {
   return `${gm} gm`;
 }
 
+const stockLikeCompactSelectClass =
+  "h-8 appearance-none rounded-lg border border-gray-200 bg-white px-2.5 pr-7 text-xs font-medium text-zinc-700 outline-none transition-colors focus:border-amber-400 focus:ring-2 focus:ring-amber-400";
+
 function Sparkline({ data }: { data: number[] }) {
   if (!data.length) return null;
   const min = Math.min(...data);
@@ -96,7 +99,7 @@ export function MetalRatesCard({ rates }: { rates: MetalRate[] }) {
                         ? setGoldGm(Number(e.target.value))
                         : setSilverGm(Number(e.target.value))
                     }
-                    className="h-8 appearance-none rounded-md border border-white/15 bg-transparent px-2.5 pr-7 text-xs font-medium text-white/90 outline-none transition-colors hover:border-white/25 focus:border-white/30 focus:ring-2 focus:ring-white/20"
+                    className={stockLikeCompactSelectClass}
                     aria-label={`${r.metal} grams`}
                   >
                     {gmOptions.map((gm) => (
@@ -105,7 +108,7 @@ export function MetalRatesCard({ rates }: { rates: MetalRate[] }) {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" />
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 </div>
 
                 {r.metal === "gold" ? (
@@ -113,7 +116,7 @@ export function MetalRatesCard({ rates }: { rates: MetalRate[] }) {
                     <select
                       value={goldKarat}
                       onChange={(e) => setGoldKarat(Number(e.target.value))}
-                      className="h-8 appearance-none rounded-md border border-white/15 bg-transparent px-2.5 pr-7 text-xs font-medium text-white/90 outline-none transition-colors hover:border-white/25 focus:border-white/30 focus:ring-2 focus:ring-white/20"
+                      className={stockLikeCompactSelectClass}
                       aria-label="Gold karat"
                     >
                       {goldKaratOptions.map((k) => (
@@ -122,7 +125,7 @@ export function MetalRatesCard({ rates }: { rates: MetalRate[] }) {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" />
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                   </div>
                 ) : null}
               </div>

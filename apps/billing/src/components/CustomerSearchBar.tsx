@@ -2,12 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Home, FileText, Wallet, CreditCard } from "lucide-react";
+import { ChevronDown, Home, FileText, Wallet, CreditCard } from "lucide-react";
 
-import type { Customer, Invoice } from "@jewellery-retail/types";
-import { useCustomers, useInvoices } from "@jewellery-retail/hooks";
-import { Button, Card, Input } from "@jewellery-retail/ui";
-import { formatCurrency } from "@jewellery-retail/utils";
+import type { Customer } from "@jewellery-retail/types";
+import { useCustomers } from "@jewellery-retail/hooks";
+import { Button, Card } from "@jewellery-retail/ui";
 
 const rightActions = [
   { label: "HOME", href: "/dashboard", icon: Home },
@@ -16,12 +15,14 @@ const rightActions = [
   { label: "UDHAAR", href: "/dashboard", icon: CreditCard },
 ];
 
-type SearchMode = "customers" | "invoice";
+const inputClass =
+  "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
+const selectClass = `${inputClass} w-full appearance-none bg-white pr-10`;
+const selectChevronClass =
+  "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400";
 
 export function CustomerSearchBar() {
   const { data: customers } = useCustomers();
-  const { data: invoices } = useInvoices();
-  const [mode, setMode] = useState<SearchMode>("customers");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -35,17 +36,6 @@ export function CustomerSearchBar() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [si, setSi] = useState("");
-
-  // Invoice (Billing header style)
-  const [billDate, setBillDate] = useState("");
-  const [invCustomerName, setInvCustomerName] = useState("");
-  const [invBillingName, setInvBillingName] = useState("");
-  const [invPrefix, setInvPrefix] = useState("");
-  const [invNo, setInvNo] = useState("");
-  const [invFirmName, setInvFirmName] = useState("");
-  const [invAccount, setInvAccount] = useState("");
-  const [invSaleExecutive, setInvSaleExecutive] = useState("");
-  const [invSaleMonth, setInvSaleMonth] = useState("");
 
   const hasCustomerSearchInput =
     firstName.trim() !== "" ||
@@ -66,193 +56,89 @@ export function CustomerSearchBar() {
   );
 
   const matchingCustomers = useMemo(() => {
-    if (mode !== "customers" || !hasCustomerSearchInput || customerSearchTerms.length === 0) return [];
+    if (!hasCustomerSearchInput || customerSearchTerms.length === 0) return [];
     const lower = customerSearchTerms.map((t) => t.toLowerCase());
     return customers.filter((c) => {
       const searchable = `${c.name} ${c.phone} ${c.email} ${c.city} ${c.address ?? ""}`.toLowerCase();
       return lower.some((term) => searchable.includes(term));
     });
-  }, [customers, mode, hasCustomerSearchInput, customerSearchTerms]);
+  }, [customers, hasCustomerSearchInput, customerSearchTerms]);
 
-  const hasInvoiceSearchInput =
-    billDate !== "" ||
-    invCustomerName.trim() !== "" ||
-    invBillingName.trim() !== "" ||
-    invPrefix.trim() !== "" ||
-    invNo.trim() !== "" ||
-    invFirmName.trim() !== "" ||
-    invAccount.trim() !== "" ||
-    invSaleExecutive.trim() !== "" ||
-    invSaleMonth.trim() !== "";
-
-  const matchingInvoices = useMemo(() => {
-    if (mode !== "invoice") return [];
-    let list = [...(invoices ?? [])];
-    if (invCustomerName.trim()) {
-      const q = invCustomerName.trim().toLowerCase();
-      list = list.filter((inv) => inv.customerName.toLowerCase().includes(q));
-    }
-
-    // "Billing name" maps to invoice.customerName in our current Invoice type (no separate billingName field)
-    if (invBillingName.trim()) {
-      const q = invBillingName.trim().toLowerCase();
-      list = list.filter((inv) => inv.customerName.toLowerCase().includes(q));
-    }
-
-    // Invoice prefix / number map to invoice.invoiceNumber (e.g. "IS-296")
-    if (invPrefix.trim() || invNo.trim()) {
-      const q = [invPrefix.trim(), invNo.trim()].filter(Boolean).join("-").toLowerCase();
-      list = list.filter((inv) => inv.invoiceNumber.toLowerCase().includes(q));
-    }
-
-    // Bill date maps to issuedAt (YYYY-MM-DD match)
-    if (billDate) {
-      list = list.filter((inv) => inv.issuedAt?.slice(0, 10) === billDate);
-    }
-
-    // NOTE: firm/account/sale executive/month are UI-only for now (no backing fields on Invoice type).
-    return list;
-  }, [
-    mode,
-    invoices,
-    billDate,
-    invCustomerName,
-    invBillingName,
-    invPrefix,
-    invNo,
-    invFirmName,
-    invAccount,
-    invSaleExecutive,
-    invSaleMonth,
-  ]);
-
-  const showCustomerResults = mode === "customers" && hasCustomerSearchInput;
+  const showCustomerResults = hasCustomerSearchInput;
   const showCustomerNoResults = showCustomerResults && matchingCustomers.length === 0;
-  const showInvoiceResults = mode === "invoice" && hasInvoiceSearchInput;
 
   return (
     <div className="space-y-2">
       <Card className="p-4 md:p-5" padding="none">
-        {/* Customers | Invoice toggle */}
-        <div className="mb-4 flex gap-1 rounded-md border border-input p-0.5">
-          <button
-            type="button"
-            onClick={() => setMode("customers")}
-            className={`flex-1 rounded py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-              mode === "customers"
-                ? "border border-zinc-300 bg-transparent text-zinc-950"
-                : "border-transparent bg-transparent text-zinc-500 hover:text-zinc-700"
-            }`}
-          >
-            Customers
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("invoice")}
-            className={`flex-1 rounded py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-              mode === "invoice"
-                ? "border border-zinc-300 bg-transparent text-zinc-950"
-                : "border-transparent bg-transparent text-zinc-500 hover:text-zinc-700"
-            }`}
-          >
-            Invoice
-          </button>
-        </div>
-
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 xl:gap-4">
-            {mode === "customers" ? (
-              <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 md:grid-cols-5">
-                {/* Customers: 5, 4, 3 layout (12 fields) */}
-                <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <div className="min-w-0 flex min-h-[44px] items-center">
-                  <label className="sr-only" htmlFor="title-select">Title</label>
-                  <select id="title-select" value={title} onChange={(e) => setTitle(e.target.value as "Mr" | "Mrs")} className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-                    <option value="Mr">Mr</option>
-                    <option value="Mrs">Mrs</option>
-                  </select>
-                </div>
-                <div className="min-w-0 flex min-h-[44px] items-center">
-                  <label className="sr-only" htmlFor="gender-select">Gender</label>
-                  <select id="gender-select" value={gender} onChange={(e) => setGender(e.target.value as "Male" | "Female")} className="h-10 w-full min-w-0 min-h-[44px] rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-                <Input placeholder="Mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="Email ID" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="Aadhaar number" value={aadhaar} onChange={(e) => setAadhaar(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="City / Village" value={city} onChange={(e) => setCity(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="State" value={state} onChange={(e) => setState(e.target.value)} className="min-w-0 min-h-[44px]" />
-                <Input placeholder="SI" value={si} onChange={(e) => setSi(e.target.value)} className="min-w-0 min-h-[44px]" />
+            <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 md:grid-cols-5">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="first-name">First name</label>
+                <input id="first-name" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
               </div>
-            ) : (
-              <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 md:grid-cols-5">
-                {/* Invoice: same styling as customers (placeholder only, min-h-[44px]) */}
-                <Input
-                  placeholder="Bill date"
-                  type="date"
-                  value={billDate}
-                  onChange={(e) => setBillDate(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Search or type"
-                  value={invCustomerName}
-                  onChange={(e) => setInvCustomerName(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Billing name"
-                  value={invBillingName}
-                  onChange={(e) => setInvBillingName(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Invoice prefix"
-                  value={invPrefix}
-                  onChange={(e) => setInvPrefix(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Invoice no."
-                  value={invNo}
-                  onChange={(e) => setInvNo(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Firm name"
-                  value={invFirmName}
-                  onChange={(e) => setInvFirmName(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Account"
-                  value={invAccount}
-                  onChange={(e) => setInvAccount(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Sale executive"
-                  value={invSaleExecutive}
-                  onChange={(e) => setInvSaleExecutive(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
-                <Input
-                  placeholder="Sale month"
-                  value={invSaleMonth}
-                  onChange={(e) => setInvSaleMonth(e.target.value)}
-                  className="min-w-0 min-h-[44px]"
-                />
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="last-name">Last name</label>
+                <input id="last-name" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
               </div>
-            )}
+              <div className="relative min-w-0">
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="title-select">Title</label>
+                <select id="title-select" value={title} onChange={(e) => setTitle(e.target.value as "Mr" | "Mrs")} className={selectClass}>
+                  <option value="Mr">Mr</option>
+                  <option value="Mrs">Mrs</option>
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
+              <div className="relative min-w-0">
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="gender-select">Gender</label>
+                <select id="gender-select" value={gender} onChange={(e) => setGender(e.target.value as "Male" | "Female")} className={selectClass}>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                <ChevronDown className={selectChevronClass} aria-hidden />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="mobile-number">Mobile number</label>
+                <input id="mobile-number" placeholder="Mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="email-id">Email ID</label>
+                <input id="email-id" placeholder="Email ID" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="aadhaar-number">Aadhaar number</label>
+                <input id="aadhaar-number" placeholder="Aadhaar number" value={aadhaar} onChange={(e) => setAadhaar(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="address">Address</label>
+                <input id="address" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="pincode">Pincode</label>
+                <input id="pincode" placeholder="Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="city-village">City / Village</label>
+                <input id="city-village" placeholder="City / Village" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="state">State</label>
+                <input id="state" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-900" htmlFor="si">SI</label>
+                <input id="si" placeholder="SI" value={si} onChange={(e) => setSi(e.target.value)} className={inputClass} />
+              </div>
+            </div>
           </div>
-          <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-zinc-100 pt-4 lg:border-l lg:border-t-0 lg:pt-0 lg:pl-4">
+          <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-zinc-100 pt-4 lg:border-l lg:border-t-0 lg:pt-0 lg:pl-4">
             {rightActions.map((action) => (
-              <Button key={action.label} variant="outline" className="min-h-[44px] border-black bg-white text-black hover:bg-zinc-100 hover:text-black" asChild>
+              <Button
+                key={action.label}
+                variant="primary"
+                className="min-h-[52px] rounded-xl px-6 text-base font-semibold tracking-wide shadow-sm"
+                asChild
+              >
                 <Link href={action.href}>
                   <action.icon className="mr-2 h-4 w-4" />
                   {action.label}
@@ -263,11 +149,9 @@ export function CustomerSearchBar() {
         </div>
       </Card>
 
-      {(mode === "customers" && hasCustomerSearchInput) || (mode === "invoice" && hasInvoiceSearchInput) ? (
+      {hasCustomerSearchInput ? (
         <p className="text-xs text-zinc-500">
-          {mode === "customers"
-            ? "Search by mobile number to find an existing customer or fill details to create a new one."
-            : "Search by invoice number, customer, amount, or status. Click a row to open the invoice."}
+          Search by mobile number to find an existing customer or fill details to create a new one.
         </p>
       ) : null}
 
@@ -283,7 +167,11 @@ export function CustomerSearchBar() {
             <div className="flex flex-col gap-4 p-6">
               <p className="text-sm font-medium text-zinc-700">No customer found</p>
               <div className="flex flex-wrap gap-3">
-                <Button variant="outline" className="min-h-[44px] border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-primary/5 hover:text-[hsl(var(--primary))]" asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] rounded-xl border-zinc-300 px-6 text-zinc-900 hover:bg-zinc-50 hover:text-zinc-900"
+                  asChild
+                >
                   <Link href="/customers/new">Create New Customer</Link>
                 </Button>
                 <Button className="min-h-[44px] bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500" asChild>
@@ -292,34 +180,6 @@ export function CustomerSearchBar() {
               </div>
             </div>
           ) : null}
-        </Card>
-      )}
-
-      {showInvoiceResults && (
-        <Card className="overflow-hidden p-0" padding="none">
-          {matchingInvoices.length > 0 ? (
-            <ul className="max-h-[280px] overflow-auto">
-              {matchingInvoices.map((inv) => (
-                <InvoiceRow key={inv.id} invoice={inv} />
-              ))}
-            </ul>
-          ) : (
-            <div className="flex flex-col gap-4 p-6">
-              <p className="text-sm font-medium text-zinc-700">No invoice found</p>
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="outline"
-                  className="min-h-[44px] border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-primary/5 hover:text-[hsl(var(--primary))]"
-                  asChild
-                >
-                  <Link href="/invoices">View Invoices</Link>
-                </Button>
-                <Button className="min-h-[44px] bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500" asChild>
-                  <Link href="/bills/new">Create New Bill</Link>
-                </Button>
-              </div>
-            </div>
-          )}
         </Card>
       )}
     </div>
@@ -336,22 +196,6 @@ function CustomerRow({ customer }: { customer: Customer }) {
         <span className="font-medium text-zinc-950">{customer.name}</span>
         <span className="text-sm text-zinc-500">{customer.phone}</span>
         <span className="text-sm text-zinc-500">{customer.city}</span>
-      </Link>
-    </li>
-  );
-}
-
-function InvoiceRow({ invoice }: { invoice: Invoice }) {
-  return (
-    <li>
-      <Link
-        href={`/invoices/${invoice.id}`}
-        className="flex min-h-[44px] items-center justify-between gap-4 border-b border-zinc-100 px-4 py-3 transition-colors hover:bg-zinc-50 last:border-b-0"
-      >
-        <span className="font-medium text-zinc-950">{invoice.invoiceNumber}</span>
-        <span className="text-sm text-zinc-500">{invoice.customerName}</span>
-        <span className="text-sm text-zinc-500">{formatCurrency(invoice.amount)}</span>
-        <span className="text-sm text-zinc-500">{invoice.status}</span>
       </Link>
     </li>
   );
