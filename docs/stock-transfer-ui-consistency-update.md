@@ -16,7 +16,10 @@
 - Updated Stock Transfer sub-pages (`Pending approval`, `Approved`, `Return`, `History`, `Report`) to use the same shared `PageHeader` layout and stock-style toolbar/table surfaces as `Stock Transfer List` for consistent back-office UI.
 - Removed the `Stock Transfer History` page route and navigation item, since this page is no longer needed.
 - Updated `StockTransferDropdown` menu surface to show all remaining options without internal scroll clipping.
-- Added an `Export` dropdown in the stock-style transfer list toolbar with options: `Copy`, `CSV`, `Excel`, `JSON`, `PDF`, and `Print` (exporting current filtered rows).
+- Replaced transfer-list status tabs (`All`, `Draft`, `Pending`, `Approved`, `Return`) with a `From`/`To` date range bar + `Go` action, aligned with the Stock Transfer Report filter style.
+- Added date-range filtering on transfer list rows using transfer date (fallback to row date) when the `Go` action is applied.
+- Removed list-toolbar utility controls (`Filter` icon and `Export` dropdown) so the bar mirrors the cleaner Stock Transfer Report pattern.
+- Updated the transfer-list date/search toolbar container to a raised card surface (`bg-white` + `shadow-md`) to match other back-office bars.
 
 ## Why
 
@@ -28,3 +31,4 @@
 - `apps/inventory/src/components/stock/transfer/ProductBarcodeSearch.tsx`
 - `apps/inventory/src/components/stock/transfer/TransferSummaryRow.tsx`
 - `apps/inventory/src/components/stock/transfer/StockTransferForm.tsx`
+- `apps/inventory/src/components/stock/transfer/StockTransferTable.tsx`

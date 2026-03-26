@@ -12,7 +12,7 @@ import {
   Button,
   Input,
 } from "@jewellery-retail/ui";
-import { Trash2, CheckCircle, Circle, PackageCheck, Filter, Search, Download, ChevronDown } from "lucide-react";
+import { Trash2, CheckCircle, Circle, PackageCheck, Search } from "lucide-react";
 import type { StockTransferItem, TransferStatus } from "@/src/types/stockTransfer";
 import { TRANSFER_STATUS_LABELS } from "@/src/types/stockTransfer";
 
@@ -54,8 +54,6 @@ export interface StockTransferTableProps {
   rowsPerPageOptions?: number[];
 }
 
-type ListStatusTab = "ALL" | TransferStatus;
-
 type ExportFormat = "copy" | "csv" | "excel" | "json" | "pdf" | "print";
 
 function getStatusBadgeClass(status: TransferStatus): string {
@@ -80,45 +78,44 @@ export function StockTransferTable({
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0] ?? 10);
   const [page, setPage] = useState(1);
   const [globalSearch, setGlobalSearch] = useState("");
-  const [activeStatusTab, setActiveStatusTab] = useState<ListStatusTab>("ALL");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [appliedDateFrom, setAppliedDateFrom] = useState("");
+  const [appliedDateTo, setAppliedDateTo] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pendingReceiveId, setPendingReceiveId] = useState<string | null>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setFilterOpen(false);
-      }
-      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
-        setExportOpen(false);
-      }
+  const parseFilterDate = useCallback((value: string): number | null => {
+    if (!value) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const time = new Date(`${value}T00:00:00`).getTime();
+      return Number.isNaN(time) ? null : time;
     }
-    if (filterOpen || exportOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+    if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(value)) {
+      const [dd, mm, yyyy] = value.split(/[/-]/);
+      const time = new Date(`${yyyy}-${mm}-${dd}T00:00:00`).getTime();
+      return Number.isNaN(time) ? null : time;
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [filterOpen, exportOpen]);
-
-  const tabCounts = useMemo(() => {
-    const typedItems = items as StockTransferTableItem[];
-    return {
-      ALL: typedItems.length,
-      DRAFT: typedItems.filter((i) => i.status === "DRAFT").length,
-      APPROVAL_PENDING: typedItems.filter((i) => i.status === "APPROVAL_PENDING").length,
-      STOCK_APPROVED: typedItems.filter((i) => i.status === "STOCK_APPROVED").length,
-      RETURN: typedItems.filter((i) => i.status === "RETURN").length,
-    };
-  }, [items]);
+    const fallback = new Date(value).getTime();
+    return Number.isNaN(fallback) ? null : fallback;
+  }, []);
 
   const filtered = useMemo(() => {
     let list = [...items];
-    const selectedStatus = statusFilter ?? (activeStatusTab === "ALL" ? null : activeStatusTab);
+    const selectedStatus = statusFilter ?? null;
     if (selectedStatus) {
       list = list.filter((i) => i.status === selectedStatus);
+    }
+    const fromTs = parseFilterDate(appliedDateFrom);
+    const toTs = parseFilterDate(appliedDateTo);
+    if (fromTs != null || toTs != null) {
+      list = list.filter((i) => {
+        const rowTs = parseFilterDate(i.transferDate || i.date);
+        if (rowTs == null) return false;
+        if (fromTs != null && rowTs < fromTs) return false;
+        if (toTs != null && rowTs > toTs) return false;
+        return true;
+      });
     }
     if (globalSearch.trim()) {
       const q = globalSearch.toLowerCase();
@@ -131,7 +128,7 @@ export function StockTransferTable({
       );
     }
     return list;
-  }, [items, statusFilter, activeStatusTab, globalSearch]) as StockTransferTableItem[];
+  }, [items, statusFilter, appliedDateFrom, appliedDateTo, parseFilterDate, globalSearch]) as StockTransferTableItem[];
 
   const totals = useMemo(() => {
     return filtered.reduce(
@@ -170,139 +167,36 @@ export function StockTransferTable({
     else setSelectedIds(new Set(paginated.map((r) => rowId(r))));
   }, [paginated, selectedIds.size]);
 
-  const exportRows = useMemo(
-    () =>
-      filtered.map((row) => ({
-        prodId: row.prodId,
-        date: row.date,
-        transferDate: row.transferDate,
-        prevFirm: row.prevFirm,
-        firm: row.firm,
-        type: row.type,
-        category: row.category,
-        name: row.name,
-        hsn: row.hsn,
-        qty: row.qty,
-        grossWeight: row.grossWeight,
-        netWeight: row.netWeight,
-        purity: row.purity,
-        fineWeight: row.fineWeight,
-        fineFineWeight: row.fineFineWeight,
-        status: TRANSFER_STATUS_LABELS[row.status],
-        return: row.returnFlag ? "Yes" : "No",
-      })),
-    [filtered]
-  );
-
-  const getCsvText = useCallback(() => {
-    const header = [
-      "PROD ID",
-      "DATE",
-      "T.DATE",
-      "PREV FIRM",
-      "FIRM",
-      "TYPE",
-      "CATEGORY",
-      "NAME",
-      "HSN",
-      "QTY",
-      "GS WT",
-      "NT WT",
-      "PURITY",
-      "FN WT",
-      "FFN WT",
-      "STATUS",
-      "RETURN",
-    ];
-    const csvRows = exportRows.map((row) =>
-      [
-        row.prodId,
-        row.date,
-        row.transferDate,
-        row.prevFirm,
-        row.firm,
-        row.type,
-        row.category,
-        row.name,
-        row.hsn,
-        row.qty,
-        row.grossWeight,
-        row.netWeight,
-        row.purity,
-        row.fineWeight,
-        row.fineFineWeight,
-        row.status,
-        row.return,
-      ]
-        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-        .join(",")
-    );
-    return [header.join(","), ...csvRows].join("\n");
-  }, [exportRows]);
-
-  const downloadFile = useCallback((content: string, fileName: string, mimeType: string) => {
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }, []);
-
-  const handleExport = useCallback(
-    async (format: ExportFormat) => {
-      if (exportRows.length === 0) {
-        setExportOpen(false);
-        return;
-      }
-      if (format === "copy") {
-        const text = getCsvText();
-        await navigator.clipboard.writeText(text);
-      } else if (format === "csv") {
-        downloadFile(getCsvText(), "stock-transfer-list.csv", "text/csv;charset=utf-8;");
-      } else if (format === "excel") {
-        downloadFile(getCsvText(), "stock-transfer-list.xls", "application/vnd.ms-excel");
-      } else if (format === "json") {
-        downloadFile(JSON.stringify(exportRows, null, 2), "stock-transfer-list.json", "application/json");
-      } else if (format === "pdf" || format === "print") {
-        window.print();
-      }
-      setExportOpen(false);
-    },
-    [exportRows, getCsvText, downloadFile]
-  );
-
   return (
     <div className="min-w-0 space-y-4 overflow-visible">
-      <div className="rounded-xl bg-transparent px-0 py-0 shadow-none">
+      <div className="rounded-xl bg-white px-4 py-3 shadow-md">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            {[
-              { key: "ALL" as const, label: "All", count: tabCounts.ALL },
-              { key: "DRAFT" as const, label: "Draft", count: tabCounts.DRAFT },
-              { key: "APPROVAL_PENDING" as const, label: "Pending", count: tabCounts.APPROVAL_PENDING },
-              { key: "STOCK_APPROVED" as const, label: "Approved", count: tabCounts.STOCK_APPROVED },
-              { key: "RETURN" as const, label: "Return", count: tabCounts.RETURN },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => {
-                  setActiveStatusTab(tab.key);
-                  setPage(1);
-                }}
-                disabled={Boolean(statusFilter)}
-                className={`flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-                  activeStatusTab === tab.key
-                    ? "bg-amber-500 text-white shadow-lg"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800"
-                } disabled:pointer-events-none disabled:opacity-60`}
-              >
-                {tab.label}
-                <span className="ml-1.5">{tab.count}</span>
-              </button>
-            ))}
+            <span className="text-sm font-semibold text-zinc-700">From</span>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 shadow-sm sm:w-[180px]"
+            />
+            <span className="text-sm font-semibold text-zinc-700">To</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 shadow-sm sm:w-[180px]"
+            />
+            <Button
+              type="button"
+              onClick={() => {
+                setAppliedDateFrom(dateFrom);
+                setAppliedDateTo(dateTo);
+                setPage(1);
+              }}
+              className="h-10 rounded-xl bg-amber-500 px-5 text-white shadow-sm hover:bg-amber-600"
+            >
+              Go
+            </Button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -315,72 +209,6 @@ export function StockTransferTable({
               placeholder="Search by product, category, firm..."
               className="h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
             />
-          </div>
-
-          <div className="relative" ref={filterRef}>
-            <button
-              type="button"
-              onClick={() => setFilterOpen((v) => !v)}
-              title="Filter"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-md transition-colors hover:bg-zinc-50"
-            >
-              <Filter className="h-4 w-4" />
-            </button>
-            {filterOpen && (
-              <div className="absolute right-0 top-full z-20 mt-2 min-w-[180px] rounded-xl border border-zinc-200 bg-white p-3 shadow-lg">
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                  Show entries
-                </label>
-                <select
-                  value={rowsPerPage}
-                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value));
-                    setPage(1);
-                    setFilterOpen(false);
-                  }}
-                  className="h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
-                >
-                  {rowsPerPageOptions.map((n) => (
-                    <option key={n} value={n}>
-                      {n} entries
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          <div className="relative" ref={exportRef}>
-            <button
-              type="button"
-              onClick={() => setExportOpen((v) => !v)}
-              className="flex h-10 shrink-0 items-center gap-2 rounded-xl border border-zinc-200 bg-white/90 px-4 py-2 text-sm font-medium text-zinc-700 shadow-md backdrop-blur-sm transition-colors hover:bg-zinc-50"
-            >
-              <Download className="h-4 w-4" />
-              Export
-              <ChevronDown className={`h-4 w-4 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
-            </button>
-            {exportOpen && (
-              <div className="absolute right-0 top-full z-30 mt-1 min-w-[180px] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-                {[
-                  { key: "copy" as const, label: "Copy" },
-                  { key: "csv" as const, label: "CSV" },
-                  { key: "excel" as const, label: "Excel" },
-                  { key: "json" as const, label: "JSON" },
-                  { key: "pdf" as const, label: "PDF" },
-                  { key: "print" as const, label: "Print" },
-                ].map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => void handleExport(item.key)}
-                    className="block w-full border-l-4 border-l-transparent px-4 py-2.5 text-left text-sm font-bold uppercase tracking-wide text-zinc-900 hover:border-l-amber-500 hover:bg-amber-50"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
         </div>
