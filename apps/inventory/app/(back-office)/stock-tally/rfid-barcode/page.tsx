@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -20,11 +20,15 @@ import {
 import {
   CheckCircle2,
   ClipboardList,
+  Download,
+  ChevronDown,
+  Filter,
   Layers,
   Minus,
   Package,
   Plus,
   RotateCcw,
+  Search,
 } from "lucide-react";
 import { useStockTallyStore } from "@/src/store/stockTallyStore";
 import { ReminderTab } from "@/src/components/stock-tally/ReminderTab";
@@ -57,13 +61,9 @@ function CategoryDropdown({
   );
 }
 
-// Matches the `stock/add` tab input styling (see `FineStockTab`)
-const stockAddInputClass =
-  "border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none w-full min-h-[44px]";
-
 /** Bottom tally cards (AVAILABLE / TALLY): clean, consistent Card UI */
 const tallyShellClass =
-  "flex min-h-[320px] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.08)] ring-1 ring-zinc-100/60";
+  "flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.35),0_10px_24px_-18px_rgba(15,23,42,0.22)]";
 
 function TallyColumnShell({
   label,
@@ -89,7 +89,7 @@ function TallyColumnShell({
 }) {
   return (
     <Card padding="none" className={tallyShellClass}>
-      <CardHeader className="mb-0 border-b border-zinc-100/80 p-4 sm:p-5">
+      <CardHeader className="mb-0 border-b border-zinc-100 bg-gradient-to-b from-zinc-50/80 to-white p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
@@ -103,13 +103,13 @@ function TallyColumnShell({
             </div>
           </div>
           <div
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border shadow-none ${iconWrapClass}`}
+            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border shadow-sm ${iconWrapClass}`}
           >
             <Icon className={`h-7 w-7 ${iconClass}`} />
           </div>
         </div>
       </CardHeader>
-      <CardBody className="min-h-0 flex-1 overflow-y-auto bg-white p-3 sm:p-4">
+      <CardBody className="min-h-0 flex-1 overflow-y-auto bg-zinc-50/30 p-3 sm:p-4">
         {children}
       </CardBody>
     </Card>
@@ -286,21 +286,21 @@ export default function StockTallyRfidBarcodePage() {
         {/* Top control section — frosted panel like StockKPIs / FirmKPIs */}
         <Card
           padding="none"
-          className="rounded-2xl border border-white/30 bg-gradient-to-br from-white/70 to-white/40 p-4 shadow-xl backdrop-blur-xl sm:p-5"
+          className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             {/* Left: toggle, open/close, counter, location, category */}
             <div className="flex flex-1 flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-zinc-700">MANUALLY</Label>
+                  <Label className="text-sm font-semibold text-zinc-700">Manually</Label>
                   <button
                     type="button"
                     role="switch"
                     aria-checked={manually}
                     onClick={() => setManually(!manually)}
                     className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-                      manually ? "bg-[#1E3A8A]" : "bg-[#1E3A8A]/20"
+                      manually ? "bg-[#173684]" : "bg-[#173684]/20"
                     }`}
                   >
                     <span
@@ -321,14 +321,16 @@ export default function StockTallyRfidBarcodePage() {
                 <Button
                   variant="outline"
                   onClick={openStock}
+                  className="h-10 rounded-xl border-zinc-200 px-4 text-zinc-700 hover:bg-zinc-50"
                 >
-                  OPEN STOCK
+                  Open stock
                 </Button>
                 <Button
                   variant="outline"
                   onClick={closeStock}
+                  className="h-10 rounded-xl border-zinc-200 px-4 text-zinc-700 hover:bg-zinc-50"
                 >
-                  CLOSE STOCK
+                  Close stock
                 </Button>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -336,9 +338,9 @@ export default function StockTallyRfidBarcodePage() {
                   <label className="mb-1 block text-xs font-medium text-zinc-900">
                     Counter Name
                   </label>
-                  <input
+                  <Input
                     type="text"
-                    className={stockAddInputClass}
+                    className="h-10 rounded-xl border border-zinc-200 bg-white px-3 py-0 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
                     value={counterName}
                     onChange={(e) => setCounterName(e.target.value)}
                     placeholder="Counter"
@@ -348,9 +350,9 @@ export default function StockTallyRfidBarcodePage() {
                   <label className="mb-1 block text-xs font-medium text-zinc-900">
                     Location Name
                   </label>
-                  <input
+                  <Input
                     type="text"
-                    className={stockAddInputClass}
+                    className="h-10 rounded-xl border border-zinc-200 bg-white px-3 py-0 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
                     placeholder="Location"
@@ -386,9 +388,9 @@ export default function StockTallyRfidBarcodePage() {
                       <Label className="mb-1 block text-xs font-medium text-zinc-600">
                         Enter Item Name
                       </Label>
-                      <input
+                      <Input
                         type="text"
-                        className={stockAddInputClass}
+                        className="h-10 rounded-xl border border-zinc-200 bg-white px-3 py-0 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
                         value={filterItemName}
                         onChange={(e) => setFilterItemName(e.target.value)}
                       />
@@ -397,9 +399,9 @@ export default function StockTallyRfidBarcodePage() {
                       <Label className="mb-1 block text-xs font-medium text-zinc-600">
                         Enter Item Id
                       </Label>
-                      <input
+                      <Input
                         type="text"
-                        className={stockAddInputClass}
+                        className="h-10 rounded-xl border border-zinc-200 bg-white px-3 py-0 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
                         value={filterItemId}
                         onChange={(e) => setFilterItemId(e.target.value)}
                       />
@@ -423,7 +425,7 @@ export default function StockTallyRfidBarcodePage() {
                     onChange={(e) => setTagsInput(e.target.value)}
                     rows={6}
                     // Match the active border/ring styling of other fields (Counter/Location inputs).
-                    className={`${stockAddInputClass} shadow-none`}
+                    className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
                     placeholder={
                       mode === "rfid"
                         ? "One tag per line"
@@ -443,13 +445,13 @@ export default function StockTallyRfidBarcodePage() {
                       onChange={(e) =>
                         setItemsPerPage(Number(e.target.value) || 30)
                       }
-                      className={`${stockAddInputClass} w-16 px-2 py-1.5`}
+                      className="h-10 w-16 rounded-xl border border-zinc-200 bg-white px-2 text-sm text-zinc-700 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="icon"
-                      className="h-10 w-10 rounded border border-slate-200 bg-white text-zinc-600 hover:bg-slate-50"
+                      className="h-10 w-10 rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-md hover:bg-zinc-50"
                       title="Refresh"
                     >
                       <RotateCcw className="h-4 w-4" />
@@ -460,17 +462,17 @@ export default function StockTallyRfidBarcodePage() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  className="min-h-[44px] flex-1 rounded-lg bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90 sm:min-h-9"
+                  className="h-10 flex-1 rounded-xl bg-[#173684] text-white shadow-sm hover:bg-[#13317a]"
                   onClick={reset}
                 >
-                  RESET
+                  Reset
                 </Button>
                 <Button
                   size="sm"
-                  className="min-h-[44px] flex-1 bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90 sm:min-h-9"
+                  className="h-10 flex-1 rounded-xl bg-[#173684] text-white shadow-sm hover:bg-[#13317a]"
                   onClick={() => {}}
                 >
-                  REPORT
+                  Report
                 </Button>
               </div>
             </div>
@@ -510,9 +512,9 @@ export default function StockTallyRfidBarcodePage() {
                       key={item.id}
                       type="button"
                       onClick={() => markAsScanned(item.id)}
-                      className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition hover:border-amber-300 hover:bg-amber-50/40 focus-visible:outline-none"
+                      className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md hover:bg-amber-50/30 focus-visible:outline-none"
                     >
-                      <div className="h-16 w-full rounded bg-slate-200 flex items-center justify-center text-slate-400 text-xs overflow-hidden">
+                      <div className="h-16 w-full rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 text-xs overflow-hidden">
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -544,7 +546,7 @@ export default function StockTallyRfidBarcodePage() {
               {isRfidOrBarcode && (
                 <>
                   {filteredAvailableEffective.length === 0 ? (
-                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/80 px-4 py-8 text-center">
+                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white px-4 py-8 text-center shadow-sm">
                       <p className="text-sm font-medium text-zinc-600">No available lines</p>
                       <p className="mt-1 max-w-xs text-xs text-zinc-500">
                         Adjust category filter or enter tags on the right to move items to scanned.
@@ -557,7 +559,7 @@ export default function StockTallyRfidBarcodePage() {
                           key={item.id}
                           type="button"
                           onClick={() => markAsScanned(item.id)}
-                      className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm text-left transition hover:border-amber-300 hover:bg-amber-50/40 focus-visible:outline-none"
+                      className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md hover:bg-amber-50/30 focus-visible:outline-none"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="font-semibold text-zinc-900 truncate">{item.productId}</p>
@@ -603,9 +605,9 @@ export default function StockTallyRfidBarcodePage() {
                       key={item.id}
                       type="button"
                       onClick={() => unmarkScanned(item.id)}
-                      className="flex flex-col gap-2 rounded-xl border border-emerald-200 bg-white p-3 text-left shadow-sm transition hover:border-red-300 hover:bg-red-50/40 focus-visible:outline-none"
+                      className="flex flex-col gap-2 rounded-xl border border-emerald-200 bg-white p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:shadow-md hover:bg-red-50/30 focus-visible:outline-none"
                     >
-                      <div className="h-16 w-full rounded bg-slate-200 flex items-center justify-center text-slate-400 text-xs overflow-hidden">
+                      <div className="h-16 w-full rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 text-xs overflow-hidden">
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -637,7 +639,7 @@ export default function StockTallyRfidBarcodePage() {
               {isRfidOrBarcode && (
                 <>
                   {scannedItemsEffective.length === 0 ? (
-                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white/80 px-4 py-8 text-center">
+                    <div className="flex min-h-[140px] flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white px-4 py-8 text-center shadow-sm">
                       <p className="text-sm font-medium text-zinc-600">Nothing scanned yet</p>
                       <p className="mt-1 max-w-xs text-xs text-zinc-500">
                         Paste or type RFID / barcode tags in the panel above to match lines here.
@@ -650,7 +652,7 @@ export default function StockTallyRfidBarcodePage() {
                           key={item.id}
                           type="button"
                           onClick={() => unmarkScanned(item.id)}
-                      className="flex flex-col gap-1 rounded-xl border border-emerald-200 bg-white p-3 shadow-sm text-left transition hover:border-red-300 hover:bg-red-50/40 focus-visible:outline-none"
+                      className="flex flex-col gap-1 rounded-xl border border-emerald-200 bg-white p-3 shadow-sm text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:shadow-md hover:bg-red-50/30 focus-visible:outline-none"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="font-semibold text-zinc-900 truncate">{item.productId}</p>
@@ -696,10 +698,15 @@ function TallyTablesPanel({
   onRemove?: (id: string) => void;
   side: "non-tally" | "tally";
 }) {
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [globalSearch, setGlobalSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(1);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     let list = [...items];
@@ -712,18 +719,19 @@ function TallyTablesPanel({
           r.category.toLowerCase().includes(q)
       );
     }
-    ["productId", "metalType", "category", "name"].forEach((col) => {
-      const v = columnFilters[col];
-      if (v?.trim()) {
-        const q = v.toLowerCase();
-        list = list.filter((r) => {
-          const val = String((r as Record<string, unknown>)[col] ?? "").toLowerCase();
-          return val.includes(q);
-        });
-      }
-    });
     return list;
-  }, [items, globalSearch, columnFilters]);
+  }, [items, globalSearch]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (filterRef.current && !filterRef.current.contains(target)) setFilterOpen(false);
+      if (exportRef.current && !exportRef.current.contains(target)) setExportOpen(false);
+      if (actionsRef.current && !actionsRef.current.contains(target)) setActionsOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const totals = useMemo(
     () =>
@@ -753,93 +761,217 @@ function TallyTablesPanel({
     { key: "fineWeight", label: "FN WT" },
   ];
 
-  // Matches the supplier detail page "value box" styling (min-h 44, rounded-lg, border-gray-200).
-  const tableSearchInputClass =
-    "min-h-[44px] w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400 focus:outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-0 focus-visible:outline-none";
+  const rowPerPageOptions = [10, 25, 50];
 
-  // Override the shared <Input /> focus-visible styling (it uses `ring-primary`, which is blue).
-  // For this page's toolbar search, we keep the focus highlight but force it to be amber.
+  type ExportFormat = "copy" | "csv" | "excel" | "json" | "pdf" | "print";
+  const exportFormats: ExportFormat[] = ["copy", "csv", "excel", "json", "pdf", "print"];
+
+  // Toolbar input styling (matches StockTransfer list/search input family).
   const tableToolbarInputClass =
-    "h-8 w-40 rounded-md border border-slate-200 bg-white px-2 text-xs text-zinc-900 shadow-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400 focus:outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-0 focus-visible:outline-none";
+    "h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-sm text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0";
 
-  const ACTIONS = ["Copy", "CSV", "Excel", "JSON", "PDF", "Print", "Column Visibility", "Print Selected"];
+  const exportRows = useMemo(() => {
+    return filtered.map((row) => ({
+      productId: row.productId,
+      metalType: row.metalType,
+      category: row.category,
+      name: row.name,
+      qty: row.qty,
+      grossWeight: row.grossWeight,
+      netWeight: row.netWeight,
+      fineWeight: row.fineWeight,
+    }));
+  }, [filtered]);
+
+  const getCsvText = useCallback(() => {
+    const header = ["PRODUCT ID", "METAL TYPE", "CATEGORY", "PRODUCT NAME", "QTY", "GS WT", "NT WT", "FN WT"];
+    const csvRows = exportRows.map((r) =>
+      [r.productId, r.metalType, r.category, r.name, r.qty, r.grossWeight, r.netWeight, r.fineWeight]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    return [header.join(","), ...csvRows].join("\n");
+  }, [exportRows]);
+
+  const downloadFile = useCallback((content: string, fileName: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleExport = useCallback(
+    async (format: ExportFormat) => {
+      if (exportRows.length === 0) {
+        setExportOpen(false);
+        return;
+      }
+
+      if (format === "copy") {
+        await navigator.clipboard.writeText(getCsvText());
+      } else if (format === "csv") {
+        downloadFile(getCsvText(), "stock-tally.csv", "text/csv;charset=utf-8;");
+      } else if (format === "excel") {
+        downloadFile(getCsvText(), "stock-tally.xls", "application/vnd.ms-excel");
+      } else if (format === "json") {
+        downloadFile(JSON.stringify(exportRows, null, 2), "stock-tally.json", "application/json");
+      } else if (format === "pdf" || format === "print") {
+        window.print();
+      }
+
+      setExportOpen(false);
+    },
+    [downloadFile, exportRows, getCsvText]
+  );
 
   return (
     <div className="space-y-3">
       {/* Toolbar bar — matches suppliers secondary bar style */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-100 bg-white px-4 py-3 shadow-md">
-        {/* Left: search + rows per page */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            type="search"
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-            placeholder="Search..."
-            className={tableToolbarInputClass}
-          />
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setPage(1);
-            }}
-            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs shadow-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400 focus:outline-none focus-visible:border-amber-400 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:outline-none"
-          >
-            {[10, 25, 50].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </div>
+      <div className="overflow-x-auto rounded-xl border border-zinc-100 bg-white px-3 py-3 shadow-md">
+        <div className="flex min-w-max items-center gap-2">
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Input
+              type="search"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              placeholder="Search..."
+              className={tableToolbarInputClass + " w-[170px] sm:w-[240px]"}
+            />
+          </div>
 
-        {/* Right: actions select — same style as CategorySelect in this file */}
-        <select
-          defaultValue=""
-          onChange={() => {}}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none min-h-[44px]"
-        >
-          <option value="">Actions</option>
-          {ACTIONS.map((l) => (
-            <option key={l} value={l}>{l}</option>
-          ))}
-        </select>
-      </div>
+          <div className="relative" ref={filterRef}>
+            <button
+              type="button"
+              onClick={() => setFilterOpen((v) => !v)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-md backdrop-blur-sm hover:bg-zinc-50"
+              aria-label="Filter"
+            >
+              <Filter className="h-4 w-4" />
+            </button>
 
-      <div className="rounded border border-slate-200 bg-white">
-        {/* Column filters in a responsive horizontal grid (matches suppliers detail layout) */}
-        <div className="p-4">
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {COLS.map((c) => (
-              <div key={c.key}>
-                <label className="mb-1 block text-xs font-medium text-zinc-900">{c.label}</label>
-                <Input
-                  type="text"
-                  placeholder="Search"
-                  value={columnFilters[c.key] ?? ""}
-                  onChange={(e) => setColumnFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
-                  className={tableSearchInputClass}
-                />
+            {filterOpen && (
+              <div className="absolute left-0 top-full z-30 mt-2 min-w-[180px] rounded-xl border border-zinc-200 bg-white p-3 shadow-lg">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Show entries</p>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setPage(1);
+                    setFilterOpen(false);
+                  }}
+                  className="h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
+                >
+                  {rowPerPageOptions.map((n) => (
+                    <option key={n} value={n}>
+                      {n} entries
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
+            )}
+          </div>
+
+          <div className="relative" ref={actionsRef}>
+            <button
+              type="button"
+              onClick={() => setActionsOpen((v) => !v)}
+              className="flex h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white/90 px-3 text-sm font-medium text-zinc-700 shadow-md backdrop-blur-sm hover:bg-zinc-50"
+            >
+              Actions
+              <ChevronDown className={`h-4 w-4 transition-transform ${actionsOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {actionsOpen && (
+              <div className="absolute right-0 top-full z-30 mt-1 min-w-[220px] rounded-xl border border-zinc-200 bg-white py-1 shadow-lg">
+                {["Column Visibility", "Print Selected"].map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className="block w-full border-l-4 border-l-transparent px-4 py-2.5 text-left text-sm font-bold uppercase tracking-wide text-zinc-900 hover:border-l-amber-500 hover:bg-amber-50"
+                    onClick={() => {
+                      if (label === "Print Selected") window.print();
+                      setActionsOpen(false);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="relative" ref={exportRef}>
+            <button
+              type="button"
+              onClick={() => setExportOpen((v) => !v)}
+              className="flex h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-white/90 px-3 py-2 text-sm font-medium text-zinc-700 shadow-md backdrop-blur-sm transition-colors hover:bg-zinc-50"
+            >
+              <Download className="h-4 w-4" />
+              Export
+              <ChevronDown className={`h-4 w-4 transition-transform ${exportOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {exportOpen && (
+              <div className="absolute right-0 top-full z-30 mt-1 min-w-[190px] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                {[
+                  { key: "copy" as const, label: "Copy" },
+                  { key: "csv" as const, label: "CSV" },
+                  { key: "excel" as const, label: "Excel" },
+                  { key: "json" as const, label: "JSON" },
+                  { key: "pdf" as const, label: "PDF" },
+                  { key: "print" as const, label: "Print" },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => void handleExport(item.key)}
+                    className="block w-full border-l-4 border-l-transparent px-4 py-2.5 text-left text-sm font-bold uppercase tracking-wide text-zinc-900 hover:border-l-amber-500 hover:bg-amber-50"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className="overflow-x-auto">
-          <Table className="min-w-[600px]">
+      <div className="min-w-0 w-full overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+          <Table className="min-w-[900px] table-fixed">
+            <TableHead>
+              <TableRow>
+                {(side === "non-tally" || side === "tally") && (
+                  <TableHeader className="w-[8%] min-w-0 py-2 text-left">ACTION</TableHeader>
+                )}
+                <TableHeader className="w-[15%] min-w-0 py-2 text-left">PRODUCT ID</TableHeader>
+                <TableHeader className="w-[12%] min-w-0 py-2 text-left">METAL TYPE</TableHeader>
+                <TableHeader className="w-[12%] min-w-0 py-2 text-left">CATEGORY</TableHeader>
+                <TableHeader className="w-[21%] min-w-0 py-2 text-left">PRODUCT NAME</TableHeader>
+                <TableHeader className="w-[8%] min-w-0 py-2 text-right">QTY</TableHeader>
+                <TableHeader className="w-[8%] min-w-0 py-2 text-right">GS WT</TableHeader>
+                <TableHeader className="w-[8%] min-w-0 py-2 text-right">NT WT</TableHeader>
+                <TableHeader className="w-[8%] min-w-0 py-2 text-right">FN WT</TableHeader>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {filtered.length > 0 && (
-                <TableRow className="bg-red-50/50">
+                <TableRow className="border-b border-zinc-100 bg-zinc-50/60">
                   {(side === "non-tally" || side === "tally") && <TableCell />}
-                  <TableCell colSpan={4} className="text-right text-xs font-semibold text-red-500" />
-                  <TableCell className="text-right text-xs font-semibold text-red-500">
+                  <TableCell colSpan={4} className="py-2 text-right text-xs font-semibold text-red-500" />
+                  <TableCell className="py-2 text-right text-xs font-semibold text-red-500">
                     {totals.qty.toFixed(3)}
                   </TableCell>
-                  <TableCell className="text-right text-xs font-semibold text-red-500">
+                  <TableCell className="py-2 text-right text-xs font-semibold text-red-500">
                     {totals.grossWeight.toFixed(3)}
                   </TableCell>
-                  <TableCell className="text-right text-xs font-semibold text-red-500">
+                  <TableCell className="py-2 text-right text-xs font-semibold text-red-500">
                     {totals.netWeight.toFixed(3)}
                   </TableCell>
-                  <TableCell className="text-right text-xs font-semibold text-red-500">
+                  <TableCell className="py-2 text-right text-xs font-semibold text-red-500">
                     {totals.fineWeight.toFixed(3)}
                   </TableCell>
                 </TableRow>
@@ -855,9 +987,9 @@ function TallyTablesPanel({
                 </TableRow>
               ) : (
                 paginated.map((row) => (
-                  <TableRow key={row.id} className="border-b border-slate-100 hover:bg-amber-50/40">
+                  <TableRow key={row.id} className="border-b border-zinc-100 bg-white">
                     {side === "non-tally" && (
-                      <TableCell className="p-1">
+                      <TableCell className="py-2">
                         <Button
                           type="button"
                           onClick={() => onAdd(row.id)}
@@ -871,7 +1003,7 @@ function TallyTablesPanel({
                       </TableCell>
                     )}
                     {side === "tally" && (
-                      <TableCell className="p-1">
+                      <TableCell className="py-2">
                         <Button
                           type="button"
                           onClick={() => onRemove?.(row.id)}
@@ -884,20 +1016,19 @@ function TallyTablesPanel({
                         </Button>
                       </TableCell>
                     )}
-                    <TableCell className="text-xs">{row.productId}</TableCell>
-                    <TableCell className="text-xs">{row.metalType}</TableCell>
-                    <TableCell className="text-xs">{row.category}</TableCell>
-                    <TableCell className="text-xs">{row.name}</TableCell>
-                    <TableCell className="text-right text-xs">{row.qty}</TableCell>
-                    <TableCell className="text-right text-xs">{row.grossWeight.toFixed(3)}</TableCell>
-                    <TableCell className="text-right text-xs">{row.netWeight.toFixed(3)}</TableCell>
-                    <TableCell className="text-right text-xs">{row.fineWeight.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.productId}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.metalType}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.category}</TableCell>
+                    <TableCell className="py-2 text-left text-sm font-medium text-zinc-900">{row.name}</TableCell>
+                    <TableCell className="py-2 text-right text-sm font-medium text-zinc-900">{row.qty}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.grossWeight.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.netWeight.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.fineWeight.toFixed(3)}</TableCell>
                   </TableRow>
                 ))
               )}
           </TableBody>
           </Table>
-        </div>
       </div>
       <p className="text-xs text-zinc-500">
         Showing {filtered.length === 0 ? 0 : start + 1} to{" "}
@@ -905,7 +1036,7 @@ function TallyTablesPanel({
         {items.length !== filtered.length ? ` (filtered from ${items.length} total)` : ""}.
       </p>
       <p className="text-xs text-zinc-400">
-        Use the column search filters above the table. Multiple terms can be combined with pipe (|).
+        Use the toolbar search above the table to filter records.
       </p>
     </div>
   );

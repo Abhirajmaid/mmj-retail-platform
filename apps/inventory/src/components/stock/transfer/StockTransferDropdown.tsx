@@ -30,7 +30,7 @@ export function StockTransferDropdown() {
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-20 mt-1 min-w-[320px] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+        <div className="absolute right-0 top-full z-20 mt-1 min-w-[320px] max-h-none overflow-visible rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
           {STOCK_TRANSFER_MENU_ITEMS.map(({ label, href }) => {
             const active = pathname === href;
             return (

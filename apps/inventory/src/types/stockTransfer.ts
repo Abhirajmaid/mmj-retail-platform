@@ -65,5 +65,4 @@ export const STOCK_TRANSFER_MENU_ITEMS = [
   { label: "STOCK TRANSFER - APPROVED LIST", href: "/stock/transfer/approved" },
   { label: "STOCK TRANSFER - RETURN LIST", href: "/stock/transfer/return-list" },
   { label: "STOCK TRANSFER REPORT", href: "/stock/transfer/report" },
-  { label: "STOCK TRANSFER HISTORY", href: "/stock/transfer/history" },
 ] as const;

@@ -64,6 +64,7 @@ export function TransferOptionsBar({
   return (
     <PageHeader
       title="Select Transfer Options"
+      className="rounded-2xl border-0 bg-white shadow-[0_16px_36px_-24px_rgba(15,23,42,0.45),0_8px_18px_-12px_rgba(15,23,42,0.28)]"
       actions={
         <div className="flex flex-wrap items-center gap-3">
           {/* 1. Counter dropdown */}

@@ -48,10 +48,10 @@ export function Navbar({
 
         <div className="flex flex-col gap-3 xl:w-[520px] xl:flex-row xl:items-center xl:justify-end">
           <div className="relative w-full min-w-0">
-            <Search className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <Input
               type="search"
-              className="h-11 min-h-[44px] rounded-2xl border-zinc-100 bg-white py-0 pl-11 pr-4 text-sm text-zinc-950 shadow-none transition focus:border-orange-200 focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-12"
+              className="h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 transition focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
               placeholder={searchPlaceholder}
             />
           </div>
@@ -61,7 +61,7 @@ export function Navbar({
               type="button"
               variant="outline"
               size="icon"
-              className="h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 rounded-2xl border-zinc-100 bg-white text-zinc-500 hover:bg-white hover:text-zinc-900"
+              className="h-10 w-10 min-h-[40px] min-w-[40px] shrink-0 rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-md transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700"
               aria-label="Notifications"
             >
               <Bell className="h-4 w-4" />

@@ -236,27 +236,26 @@ export function StockTransferForm() {
       />
 
       {/* Action buttons */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-6">
         <Link href="/stock">
-          <Button variant="outline" className="min-h-[44px]">
-            CANCEL
+          <Button variant="outline" className="h-10 rounded-xl border-zinc-200 px-5 text-zinc-700 hover:bg-zinc-50">
+            Cancel
           </Button>
         </Link>
         <div className="flex gap-3">
           <Button
             type="button"
-            variant="outline"
-            className="min-h-[44px] border-amber-500 text-amber-700 hover:bg-amber-50"
+            className="h-10 rounded-xl bg-amber-500 px-5 text-white shadow-sm hover:bg-amber-600"
             onClick={handleSaveDraft}
           >
-            SAVE TRANSFER
+            Save transfer
           </Button>
           <Button
             type="button"
-            className="min-h-[44px] bg-amber-500 text-white hover:bg-amber-600"
+            className="h-10 rounded-xl bg-amber-500 px-5 text-white shadow-sm hover:bg-amber-600"
             onClick={handleSubmitForApproval}
           >
-            SUBMIT FOR APPROVAL
+            Submit for approval
           </Button>
         </div>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ArrowLeftRight } from "lucide-react";
-import { Button } from "@jewellery-retail/ui";
+import { Search } from "lucide-react";
+import { Button, Input, PageHeader, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jewellery-retail/ui";
 import { useStockTransferStore } from "@/src/store/stockTransferStore";
 import { useFirmStore } from "@/src/store/firm-store";
 import { FirmSelectorBar } from "@/src/components/stock/transfer/FirmSelectorBar";
@@ -55,92 +55,91 @@ export default function StockTransferReportPage() {
   }, [filteredTransfers]);
 
   return (
-    <div className="min-w-0 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 border-l-4 border-amber-500 pl-4">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-            <ArrowLeftRight className="h-5 w-5" />
-          </span>
-          <h1 className="text-xl font-bold uppercase tracking-wide text-zinc-900">
-            STOCK TRANSFER REPORT
-          </h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <FirmSelectorBar />
-          <StockTransferDropdown />
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden">
+      <PageHeader
+        title="Stock Transfer Report"
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <FirmSelectorBar />
+            <StockTransferDropdown />
+          </div>
+        }
+      />
+
+      <div className="rounded-xl bg-white px-4 py-3 shadow-md">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-zinc-700">From</span>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 shadow-sm sm:w-[180px]"
+            />
+            <span className="text-sm font-semibold text-zinc-700">To</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 shadow-sm sm:w-[180px]"
+            />
+            <Button className="h-10 rounded-xl bg-amber-500 px-5 text-white shadow-sm hover:bg-amber-600">
+              Go
+            </Button>
+          </div>
+
+          <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Input
+              type="search"
+              placeholder="Search firm, category, type..."
+              className="h-10 rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
-        <span className="text-sm font-semibold text-zinc-700">FROM</span>
-        <input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          className="rounded border border-slate-200 px-3 py-2 text-sm"
-        />
-        <span className="text-sm font-semibold text-zinc-700">TO</span>
-        <input
-          type="date"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          className="rounded border border-slate-200 px-3 py-2 text-sm"
-        />
-        <Button className="min-h-[44px] bg-amber-500 text-white hover:bg-amber-600">GO</Button>
-      </div>
-
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
-        <table className="w-full min-w-[600px] text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 bg-slate-100 font-bold uppercase tracking-wide">
-              <th className="p-3 text-left">FIRM</th>
-              <th className="p-3 text-left">DATE</th>
-              <th className="p-3 text-left">CATEGORY</th>
-              <th className="p-3 text-left">TYPE</th>
-              <th className="p-3 text-right">QTY</th>
-              <th className="p-3 text-right">GS WT</th>
-              <th className="p-3 text-right">NT WT</th>
-              <th className="p-3 text-right">FN WT</th>
-              <th className="p-3 text-right">FFN WT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(summary).map(([firm, rows]) =>
-              rows.map((row, i) => (
-                <tr key={`${firm}-${i}`} className="border-b border-slate-100 hover:bg-slate-50/50">
-                  <td className="p-3">{firm}</td>
-                  <td className="p-3">{row.date}</td>
-                  <td className="p-3">{row.category}</td>
-                  <td className="p-3">{row.type}</td>
-                  <td className="p-3 text-right">{row.qty.toFixed(3)}</td>
-                  <td className="p-3 text-right">{row.gsWt.toFixed(3)}</td>
-                  <td className="p-3 text-right">{row.ntWt.toFixed(3)}</td>
-                  <td className="p-3 text-right">{row.fnWt.toFixed(3)}</td>
-                  <td className="p-3 text-right">{row.ffnWt.toFixed(3)}</td>
-                </tr>
-              ))
-            )}
-            {Object.keys(summary).length === 0 && (
-              <tr>
-                <td colSpan={9} className="p-8 text-center text-zinc-500">
+      <div className="min-w-0 w-full overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+        <Table className="min-w-[900px] table-fixed">
+          <TableHead>
+            <TableRow>
+              <TableHeader className="w-[18%] min-w-0 py-2">FIRM</TableHeader>
+              <TableHeader className="w-[12%] min-w-0 py-2">DATE</TableHeader>
+              <TableHeader className="w-[14%] min-w-0 py-2">CATEGORY</TableHeader>
+              <TableHeader className="w-[14%] min-w-0 py-2">TYPE</TableHeader>
+              <TableHeader className="w-[10%] min-w-0 py-2 text-right">QTY</TableHeader>
+              <TableHeader className="w-[10%] min-w-0 py-2 text-right">GS WT</TableHeader>
+              <TableHeader className="w-[10%] min-w-0 py-2 text-right">NT WT</TableHeader>
+              <TableHeader className="w-[10%] min-w-0 py-2 text-right">FN WT</TableHeader>
+              <TableHeader className="w-[10%] min-w-0 py-2 text-right">FFN WT</TableHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Object.keys(summary).length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="py-8 text-center text-zinc-500">
                   No transfer data for report
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
+            ) : (
+              Object.entries(summary).flatMap(([firm, rows]) =>
+                rows.map((row, i) => (
+                  <TableRow key={`${firm}-${i}`} className="border-b border-zinc-100 bg-white">
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{firm}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.date}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.category}</TableCell>
+                    <TableCell className="py-2 text-left text-sm text-zinc-700">{row.type}</TableCell>
+                    <TableCell className="py-2 text-right text-sm font-medium text-zinc-900">{row.qty.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.gsWt.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.ntWt.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.fnWt.toFixed(3)}</TableCell>
+                    <TableCell className="py-2 text-right text-sm text-zinc-700">{row.ffnWt.toFixed(3)}</TableCell>
+                  </TableRow>
+                ))
+              )
             )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {["Copy", "CSV", "Excel", "JSON", "PDF", "Print", "Column Visibility"].map((label) => (
-          <button
-            key={label}
-            type="button"
-            className="rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-slate-50"
-          >
-            {label}
-          </button>
-        ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState, useEffect } from "react";
-import { Button, Card } from "@jewellery-retail/ui";
-import { X } from "lucide-react";
+import { Button, Card, Input } from "@jewellery-retail/ui";
+import { Search, X } from "lucide-react";
 
 /** One item from current stock (e.g. from movements) for search list and details */
 export interface StockSearchItem {
@@ -49,7 +49,7 @@ export function ProductBarcodeSearch({
   searchValue,
   onSearchChange,
   onSelectItem,
-  placeholder = "SEARCH PRODUCT ID / BARCODE / RFID",
+  placeholder = "Search product ID / barcode / RFID",
   showAddHint = false,
   onClearSelection,
   addedItems = [],
@@ -148,13 +148,13 @@ export function ProductBarcodeSearch({
   return (
     <Card
       padding="none"
-      className="min-h-[120px] min-w-0 rounded-lg border border-zinc-300 bg-white shadow-none"
+      className="min-h-[120px] min-w-0 rounded-2xl border-0 bg-white shadow-[0_16px_36px_-24px_rgba(15,23,42,0.45),0_8px_18px_-12px_rgba(15,23,42,0.28)]"
     >
-      <div className="grid gap-3 p-4">
+      <div className="grid gap-3 p-4 sm:p-5">
         <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-[55%_1fr]">
           {/* Left: picked items list (each with full details + cross) or single selection + added list */}
           <div className="min-w-0">
-            <div className="flex min-h-[140px] max-h-[320px] flex-col gap-2 overflow-y-auto rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-zinc-800">
+            <div className="flex min-h-[140px] max-h-[320px] flex-col gap-2 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50/30 px-3 py-3 text-sm text-zinc-800">
               {pickedItems.length > 0 ? (
                 <>
                   {showAddHint && (
@@ -166,13 +166,13 @@ export function ProductBarcodeSearch({
                     {pickedItems.map((item) => (
                       <div
                         key={item.productId}
-                        className="relative shrink-0 space-y-2 rounded border border-slate-100 bg-slate-50/50 p-2 pr-8"
+                        className="relative shrink-0 space-y-2 rounded-lg border border-zinc-200 bg-white p-2.5 pr-8 shadow-sm"
                       >
                         {onRemovePickedItem && (
                           <button
                             type="button"
                             onClick={() => onRemovePickedItem(item.productId)}
-                            className="absolute right-1 top-1 rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+                            className="absolute right-1 top-1 rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
                             aria-label={`Remove ${item.productName}`}
                           >
                             <X className="h-4 w-4" />
@@ -216,12 +216,12 @@ export function ProductBarcodeSearch({
                   </div>
                 </>
               ) : selectedItem && !addedItems.some((a) => a.prodId === selectedItem.productId) ? (
-                <div className="relative shrink-0 space-y-2 rounded border border-slate-100 bg-slate-50/50 p-2 pr-8">
+                <div className="relative shrink-0 space-y-2 rounded-lg border border-zinc-200 bg-white p-2.5 pr-8 shadow-sm">
                   {onClearSelection && (
                     <button
                       type="button"
                       onClick={onClearSelection}
-                      className="absolute right-1 top-1 rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+                      className="absolute right-1 top-1 rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
                       aria-label="Remove from selection"
                     >
                       <X className="h-4 w-4" />
@@ -272,7 +272,7 @@ export function ProductBarcodeSearch({
                   {addedItems.map((item) => (
                     <div
                       key={item.prodId}
-                      className="flex items-start justify-between gap-2 rounded border border-slate-100 bg-white p-2 pr-8 shadow-sm"
+                      className="flex items-start justify-between gap-2 rounded-lg border border-zinc-200 bg-white p-2.5 pr-8 shadow-sm"
                     >
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <p className="font-medium text-zinc-900">{item.name}</p>
@@ -284,7 +284,7 @@ export function ProductBarcodeSearch({
                         <button
                           type="button"
                           onClick={() => onRemoveAddedItem(item.prodId)}
-                          className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+                          className="shrink-0 rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
                           aria-label={`Remove ${item.name}`}
                         >
                           <X className="h-4 w-4" />
@@ -303,9 +303,10 @@ export function ProductBarcodeSearch({
           </div>
 
           {/* Right: search input + dropdown list + GO */}
-          <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-flex-start">
+          <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
             <div className="relative flex-1">
-              <input
+              <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Input
                 ref={inputRef}
                 type="text"
                 value={searchValue}
@@ -315,12 +316,12 @@ export function ProductBarcodeSearch({
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
-                className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500"
+                className="h-10 w-full rounded-xl border border-zinc-200 bg-white py-0 pl-10 pr-4 text-zinc-900 shadow-md placeholder:text-zinc-400 focus:border-amber-500/50 focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
               />
               {listOpen && suggestions.length > 0 && (
                 <div
                   ref={listRef}
-                  className="absolute left-0 right-0 bottom-full z-20 mb-1 max-h-[240px] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                  className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[240px] overflow-y-auto rounded-xl border border-zinc-200 bg-white py-1 shadow-lg"
                 >
                   {suggestions.map((item, i) => (
                     <button
@@ -334,8 +335,8 @@ export function ProductBarcodeSearch({
                       }}
                       className={`block w-full px-3 py-2.5 text-left text-sm ${
                         i === highlightIndex
-                          ? "bg-[#1E3A8A]/10 text-[#1E3A8A] font-medium"
-                          : "text-zinc-800 hover:bg-slate-50"
+                          ? "bg-amber-50 font-medium text-amber-700"
+                          : "text-zinc-800 hover:bg-zinc-50"
                       }`}
                     >
                       <span className="font-medium">{item.productName}</span>
@@ -349,7 +350,7 @@ export function ProductBarcodeSearch({
             <Button
               type="button"
               onClick={handleGo}
-              className="min-h-[44px] shrink-0 bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90"
+              className="h-10 shrink-0 rounded-xl bg-[#173684] px-5 text-white shadow-sm hover:bg-[#13317a]"
             >
               GO
             </Button>
